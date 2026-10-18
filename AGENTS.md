@@ -40,7 +40,7 @@ npm run dev
 npm run check
 ```
 
-所有命令从仓库根目录运行。`check` 包含类型检查、测试、桌面构建、CLI 构建和 skill 构建。只对实际改动运行相称检查；发布前执行完整检查和目标平台包内冒烟测试。
+开发与打包使用 Node.js 24 LTS；发布 CLI / skill 的运行时仍支持 Node.js 20+。所有命令从仓库根目录运行。`check` 包含类型检查、测试、桌面构建、CLI 构建和 skill 构建。只对实际改动运行相称检查；发布前执行完整检查和目标平台包内冒烟测试。
 
 不要提交 `config.yaml`、API Key、签名凭据、`node_modules/`、`out/`、安装包及临时检查文件。`skills/bcc/bin/bcc.cjs` 是有意提交的分发产物。
 
