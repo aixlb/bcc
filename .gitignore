@@ -1,0 +1,115 @@
+node_modules/
+
+out/
+
+dist/
+
+build/*
+
+!build/icon.ico
+
+!build/icon.icns
+
+!build/icon.svg
+
+!build/logo-black.svg
+
+!build/entitlements.mas.plist
+
+!build/entitlements.mas.inherit.plist
+
+!build/entitlements.mac.plist
+
+# TypeScript 增量编译缓存
+
+*.tsbuildinfo
+
+# 日志
+
+*.log
+
+npm-debug.log*
+
+yarn-debug.log*
+
+# 编辑器
+
+.vscode/
+
+.idea/
+
+*.swp
+
+*.swo
+
+# 系统
+
+.DS_Store
+
+Thumbs.db
+
+# Electron 缓存
+
+.electron-vite-cache/
+
+# 用户数据
+
+output/
+
+data/
+
+# Claude Code 配置
+
+.claude/
+
+# Electron 打包输出
+
+release/
+
+*.exe
+
+# 测试样本（大文件，不进 git）
+
+sample/
+
+samples/
+
+test-video.mp4
+
+# 敏感配置（含 API Key），用 config.example.yaml 作为模板
+
+config.yaml
+
+# 历史 Python 代码缓存
+
+__pycache__/
+
+*.pyc
+
+# CLI 发布包：产物（index.mjs/package.json）不入库，README.md/.npmrc 入库
+
+cli-dist/index.mjs
+
+cli-dist/package.json
+
+cli-dist/*.tgz
+
+# 调试临时输出（MiniMax 等）
+
+test/
+
+# 打包压缩包 / 大文件（超 GitHub 100MB 限制，不进 git）
+
+*.zip
+
+# 临时渲染预览帧（根目录）
+
+/r[0-9]*_*.png
+
+# Local migration inputs
+.repo-inspection/
+
+# skills/bcc/bin/bcc.cjs is versioned for self-contained skill installs.
+
+cli-dist/LICENSE
+cli-dist/THIRD_PARTY_NOTICES.md

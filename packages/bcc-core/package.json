@@ -1,0 +1,8 @@
+{
+  "name": "@aixlb/bcc-core",
+  "version": "0.4.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "BCC shared video, script, storyboard and research logic"
+}
