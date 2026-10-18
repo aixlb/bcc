@@ -1,0 +1,65 @@
+name: Build Windows x64
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: 要构建的分支或 tag（留空使用当前选定分支）
+        type: string
+        required: false
+      release_tag:
+        description: 上传到当前仓库已有 Release 的 tag（留空仅提供 artifact）
+        type: string
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 发布时直接从目标 tag 构建，防止把其他分支的包传到该 Release。
+          ref: ${{ inputs.release_tag || inputs.source_ref || github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: 安装锁定依赖
+        run: npm ci --no-audit --no-fund
+      - name: 单元测试与类型检查
+        run: |
+          npm test
+          npm run typecheck
+      - name: 构建 Windows x64 免安装版
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: |
+          npm run build
+          npx electron-builder --win portable --x64 --publish never
+      - name: 启动最终 EXE 做运行时冒烟测试
+        run: npm run smoke:win-release
+      - name: 保存验证后的 EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: bcc-Windows-x64
+          path: |
+            release/*.exe
+            release/windows-build-info.txt
+          if-no-files-found: error
+          retention-days: 7
+      - name: 上传当前仓库 Release
+        if: ${{ inputs.release_tag != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        shell: pwsh
+        run: |
+          gh release view $env:RELEASE_TAG
+          if ($LASTEXITCODE -ne 0) { throw '目标 Release 不存在，请先创建对应源码 tag 和 Release。' }
+          $releaseFiles = @(Get-ChildItem -LiteralPath release -Filter *.exe | ForEach-Object { $_.FullName })
+          gh release upload $env:RELEASE_TAG @releaseFiles --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Release 上传失败。' }

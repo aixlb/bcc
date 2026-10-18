@@ -1,0 +1,16 @@
+{
+  "//": "把本文件改名为 models.json，放到 config.yaml 同目录，即可免升级增删 GUI「模型」下拉项。",
+  "//合并规则": "扩展+覆盖：内置预设始终在；同名 value 覆盖其 label/desc，新 value 追加到末尾；删不掉内置项。",
+  "//说明": "仅影响桌面端下拉预设；实际调用的是配置里保存的模型字符串。CLI 用 bcc config set <provider>.model <任意值> 即可，不依赖本文件。",
+  "gemini": [
+    { "value": "gemini-3.5-flash", "label": "Gemini 3.5 Flash（改个说明）", "desc": "覆盖内置项的描述示例" },
+    { "value": "gemini-3.1-pro-preview", "label": "Gemini 3.1 Pro Preview", "desc": "追加：最强，贵，长视频/复杂剧情用" }
+  ],
+  "kimi": [
+    { "value": "kimi-k2.8", "label": "Kimi K2.8", "desc": "追加：将来发布的新模型" }
+  ],
+  "minimax": [],
+  "openai": [
+    { "value": "gpt-5.6-terra", "label": "GPT-5.6 Terra", "desc": "追加示例：更便宜的多模态" }
+  ]
+}

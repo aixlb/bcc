@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["node", "electron-vite/node"],
+    "outDir": "out/_types_node",
+    "baseUrl": ".",
+    "paths": {
+      "@main/*": ["apps/bcc-desktop/src/main/*"],
+      "@preload/*": ["apps/bcc-desktop/src/preload/*"],
+      "@shared/*": ["packages/bcc-core/src/shared/*"],
+      "@core/*": ["packages/bcc-core/src/*"]
+    }
+  },
+  "include": [
+    "electron.vite.config.ts",
+    "apps/bcc-desktop/src/main/**/*.ts",
+    "apps/bcc-desktop/src/preload/**/*.ts",
+    "apps/bcc-cli/src/**/*.ts",
+    "packages/bcc-core/src/**/*.ts"
+  ]
+}

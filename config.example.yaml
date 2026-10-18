@@ -1,0 +1,50 @@
+# V2Script 配置示例
+# 复制为 config.yaml 并填入真实凭据；或直接在应用设置页填写（会自动写回 config.yaml）
+# 想新增「模型」下拉项又不想升级版本？在本文件同目录放一个 models.json（见 models.example.json）。
+
+gemini:
+  api_key: ""                      # Gemini API Key（必填）申请：https://aistudio.google.com/apikey
+  model: "gemini-3.5-flash"        # 模型名（可在设置页切换）
+  video_resolution: "low"          # low: 省 token / high: 细节更好
+  proxy: ""                        # 留空 = 跟随系统/Chrome 代理（推荐）；强制指定才填 http://127.0.0.1:7890
+
+kimi:
+  api_key: ""                      # Moonshot Kimi API Key
+  model: "kimi-k3"
+  # base_url: ""                   # 内置供应商无需配置（固定官方端点）；仅自定义供应商需要 base_url
+
+minimax:
+  api_key: ""                      # MiniMax API Key
+  model: "MiniMax-M3"
+  # base_url: ""                   # 同上，内置供应商无需配置
+
+openai:
+  api_key: ""                      # OpenAI (ChatGPT) API Key，platform.openai.com/api-keys
+  model: "gpt-5.6"                 # 剧本走关键帧多图分析（官方接口不收视频，无音频理解）
+  # base_url: ""                   # 留空 = 官方端点；网关/代理场景才填
+
+anthropic:
+  api_key: ""                      # Anthropic (Claude) API Key，platform.claude.com
+  model: "claude-fable-5"          # 剧本走关键帧多图分析（官方接口不收视频，无音频理解）
+  # base_url: ""                   # 留空 = 官方端点；网关/代理场景才填
+
+script_provider: "gemini"          # 剧本生成用哪个：gemini | kimi | minimax | openai | anthropic | 自定义供应商 id
+script_master: ""                  # 剧本大师：留空 = 默认；"shanzhiyin" = 山之音（生成剧本时注入其方法论）
+storyboard_provider: "gemini"      # 分镜分析用哪个：gemini | kimi | minimax | openai | anthropic | 自定义供应商 id
+storyboard_master: ""              # 分镜大师：留空 = 默认；"shanzhiyin" = 山之音（逐镜分析时注入，可与剧本大师不同）
+
+storyboard:
+  prompt: ""                       # 自定义分镜 prompt（留空用默认）
+  cut_method: "smart"              # 切割方式：smart（混合检测，默认）| scene（帧差值检测）
+  scene_threshold: 0.3             # scene 方式：每帧差异值 > 阈值即切点（0~1）
+  smart_hard_min: 5.5              # smart：硬切最低帧差（调低更敏感）
+  smart_hard_ratio: 8              # smart：硬切相对倍率（× 局部中位数，排除运镜误报）
+  smart_min_gap: 0.3               # smart：切点最小间隔（秒）；0.1~0.15 可拆动画连环快切
+  max_shots: 200
+  concurrency: 3                   # 单视频内的 analyze 并发
+
+research:                          # 风格研究（旧键名 distillation 仍可读，会自动迁移）
+  video_concurrency: 2             # 研究：同时跑几个视频的分镜（1..4）
+  synthesis_provider: null         # 合成风格指南的 provider；null = 继承 storyboard_provider
+  mosaic_frames_per_video: 6       # 每个子视频拼几张关键帧到 mosaic
+  synthesis_prompt: ""             # 自定义合成 prompt（留空用默认）
