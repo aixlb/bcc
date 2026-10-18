@@ -1,0 +1,38 @@
+name: Check bcc
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: 安装锁定依赖
+        run: npm ci --no-audit --no-fund
+      - name: 类型检查、测试与构建全部入口
+        run: npm run check
+      - name: 验证 CLI 与自包含 skill 可启动
+        run: |
+          node out/cli/index.mjs --version
+          node skills/bcc/bin/bcc.cjs --version
+      - name: 验证 skill 运行时与源码同步
+        run: git diff --exit-code -- skills/bcc/bin/bcc.cjs

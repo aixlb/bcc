@@ -1,0 +1,68 @@
+name: Build macOS native zip
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: 要构建的分支或 tag（留空使用当前选定分支）
+        type: string
+        required: false
+      release_tag:
+        description: 上传到当前仓库已有 Release 的 tag（留空仅提供 artifact）
+        type: string
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-mac:
+    # 只构建 runner 原生架构，保持 ffmpeg 与 Electron 架构一致。
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || inputs.source_ref || github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: 安装锁定依赖
+        run: npm ci --no-audit --no-fund
+      - name: 单元测试与类型检查
+        run: |
+          npm test
+          npm run typecheck
+      - name: 获取原生架构
+        id: native
+        run: node -e 'require("node:fs").appendFileSync(process.env.GITHUB_OUTPUT, "arch=" + process.arch + "\n")'
+      - name: 构建原生架构 zip（不签名）
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          BUILD_ARCH: ${{ steps.native.outputs.arch }}
+        run: |
+          npm run build
+          npx electron-builder --mac zip --"$BUILD_ARCH" --publish never
+      - name: 验证包内应用可启动
+        run: |
+          APP=$(find release -type f -path '*/XLB Storyboard.app/Contents/MacOS/XLB Storyboard' -print -quit)
+          test -n "$APP"
+          OUTPUT=$("$APP" --smoke-test 2>&1)
+          printf '%s\n' "$OUTPUT"
+          [[ "$OUTPUT" == *XLB_STORYBOARD_PACKAGED_RUNTIME_OK* ]]
+      - name: 保存 macOS zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: bcc-macOS-${{ steps.native.outputs.arch }}
+          path: release/*.zip
+          if-no-files-found: error
+          retention-days: 7
+      - name: 上传当前仓库 Release
+        if: ${{ inputs.release_tag != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          gh release view "$RELEASE_TAG"
+          gh release upload "$RELEASE_TAG" release/*.zip --clobber

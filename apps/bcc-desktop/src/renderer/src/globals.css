@@ -1,0 +1,207 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply bg-ink-950 text-zinc-100 font-sans antialiased;
+    overflow: hidden;
+    letter-spacing: -0.012em;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    background-image:
+      radial-gradient(ellipse 80% 70% at 50% 0%, rgba(212, 163, 115, 0.055) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%, rgba(126, 184, 212, 0.03) 0%, transparent 60%),
+      linear-gradient(180deg, #08070a 0%, #0c0a10 100%);
+    background-attachment: fixed;
+  }
+
+  /* restore neutral tracking for mono / label contexts */
+  .font-mono,
+  code,
+  pre {
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* scrollbar — nearly invisible, appears on hover */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.16); }
+
+  ::selection {
+    background: rgba(212, 163, 115, 0.28);
+    color: #fff;
+  }
+
+  .drag-region  { -webkit-app-region: drag; }
+  .no-drag      { -webkit-app-region: no-drag; }
+}
+
+@layer components {
+  /* ── Glass panel ────────────────────────────────────────────────────────── */
+  .glass-panel {
+    @apply relative bg-ink-800/40 border border-white/[0.06] backdrop-blur-xl;
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.045) inset,
+      0 -1px 0 0 rgba(0, 0, 0, 0.45) inset,
+      0 24px 56px -20px rgba(0, 0, 0, 0.65),
+      0 0 0 0.5px rgba(255, 255, 255, 0.03) inset;
+  }
+
+  /* ── Noise grain overlay ─────────────────────────────────────────────────── */
+  .grain-overlay::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0 z-10;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' /%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.7 0' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    opacity: 0.12;
+  }
+
+  /* ── Primary button — warm gold ─────────────────────────────────────────── */
+  .btn-primary {
+    @apply relative overflow-hidden rounded-lg px-4 py-2 text-sm font-medium text-ink-950 transition-all duration-150;
+    background: linear-gradient(145deg, #e8b87e 0%, #d4a373 55%, #b88d5e 100%);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.28) inset,
+      0 -1px 0 0 rgba(0, 0, 0, 0.18) inset,
+      0 4px 14px -3px rgba(212, 163, 115, 0.38),
+      0 1px 3px -1px rgba(0, 0, 0, 0.3);
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.28) inset,
+      0 -1px 0 0 rgba(0, 0, 0, 0.18) inset,
+      0 8px 22px -4px rgba(212, 163, 115, 0.48),
+      0 2px 6px -1px rgba(0, 0, 0, 0.3);
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: scale(0.97) translateY(0);
+    filter: brightness(0.97);
+  }
+  .btn-primary:disabled {
+    @apply cursor-not-allowed opacity-35;
+    transform: none;
+  }
+
+  /* ── Ghost button ────────────────────────────────────────────────────────── */
+  .btn-ghost {
+    @apply rounded-lg px-3 py-2 text-sm text-zinc-400 transition-all duration-150
+           hover:bg-white/[0.055] hover:text-zinc-200
+           active:scale-[0.96] active:bg-white/[0.08];
+  }
+
+  /* ── Danger button ───────────────────────────────────────────────────────── */
+  .btn-danger {
+    @apply rounded-lg px-3 py-2 text-sm text-red-400 transition-all duration-150
+           hover:bg-red-500/[0.10] hover:text-red-300
+           active:scale-[0.96];
+  }
+
+  /* ── Form inputs ─────────────────────────────────────────────────────────── */
+  .input-field {
+    @apply w-full rounded-lg border border-white/[0.08] bg-black/25 px-3 py-2 text-sm
+           text-zinc-100 outline-none transition-all duration-150
+           placeholder:text-zinc-600;
+  }
+  .input-field:focus {
+    @apply border-accent/50;
+    box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.10), 0 0 0 1px rgba(212, 163, 115, 0.25);
+  }
+
+  /* ── Scene cards ─────────────────────────────────────────────────────────── */
+  .scene-card {
+    @apply relative cursor-pointer rounded-lg border border-transparent transition-all duration-150;
+  }
+  .scene-card:hover {
+    @apply border-white/[0.07] bg-white/[0.025];
+  }
+  .scene-card.active {
+    @apply border-accent/30 bg-accent/[0.045];
+    box-shadow: 0 0 0 1px rgba(212, 163, 115, 0.16);
+  }
+  .scene-card.active::before {
+    content: '';
+    @apply absolute left-0 top-3 h-[calc(100%-1.5rem)] w-[2px] rounded-full bg-accent;
+    opacity: 0.9;
+  }
+
+  /* ── Timecode chip ───────────────────────────────────────────────────────── */
+  .timecode {
+    @apply inline-flex items-center rounded font-mono text-[11px] font-medium tracking-tight text-accent;
+  }
+
+  /* ── Pulse indicator ─────────────────────────────────────────────────────── */
+  .pulse-dot {
+    @apply relative inline-block h-2 w-2 rounded-full;
+  }
+  .pulse-dot::after {
+    content: '';
+    @apply absolute inset-0 animate-ping rounded-full opacity-75;
+    background: currentColor;
+  }
+
+  /* ── Spotlight hover card — cursor-chased glow border ───────────────────── */
+  .spotlight-item {
+    --mx: 50%; --my: 50%;
+    position: relative;
+  }
+  .spotlight-item::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(
+      80px circle at var(--mx) var(--my),
+      rgba(212, 163, 115, 0.14),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .spotlight-item:hover::before { opacity: 1; }
+
+  /* ── Section label — refined small caps alternative ─────────────────────── */
+  .section-label {
+    @apply text-[10px] font-semibold tracking-[0.1em] text-zinc-500;
+    text-transform: uppercase;
+  }
+}
+
+/* ── Scanlines overlay (cinematic) ──────────────────────────────────────────── */
+.scanlines::before {
+  content: '';
+  @apply pointer-events-none fixed inset-0 z-[1];
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 2px,
+    rgba(255, 255, 255, 0.009) 2px,
+    rgba(255, 255, 255, 0.009) 3px
+  );
+}
