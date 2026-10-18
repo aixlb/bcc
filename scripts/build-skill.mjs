@@ -11,12 +11,14 @@
 import esbuild from 'esbuild'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { writeThirdPartyNotices } from './third-party-notices.mjs'
 
 const pkg = JSON.parse(readFileSync('package.json', 'utf-8'))
 
-await esbuild.build({
+const result = await esbuild.build({
   entryPoints: ['apps/bcc-cli/src/index.ts'],
   bundle: true,
+  metafile: true,
   platform: 'node',
   target: 'node20',
   format: 'cjs',
@@ -36,4 +38,6 @@ await esbuild.build({
   logLevel: 'info',
 })
 
+const noticeCount = writeThirdPartyNotices(result.metafile)
+console.log(`[build-skill] 已保留 ${noticeCount} 个内联依赖的许可通知`)
 console.log('[build-skill] skills/bcc/bin/bcc.cjs 已生成（自包含，除 node 内置与 ffmpeg 二进制外零外部依赖）')

@@ -34,5 +34,5 @@ jobs:
         run: |
           node out/cli/index.mjs --version
           node skills/bcc/bin/bcc.cjs --version
-      - name: 验证 skill 运行时与源码同步
-        run: git diff --exit-code -- skills/bcc/bin/bcc.cjs
+      - name: 验证 skill 运行时和依赖许可与源码同步
+        run: git diff --exit-code -- skills/bcc/bin/bcc.cjs THIRD_PARTY_NOTICES.md skills/bcc/THIRD_PARTY_NOTICES.md
