@@ -73,7 +73,7 @@ skill 位于 [skills/bcc](skills/bcc/SKILL.md)，随仓库提交自包含的 `bi
 
 ## 开发
 
-需要 Node.js 20+，从仓库根目录安装和运行：
+开发与打包使用 Node.js 24 LTS；发布的 CLI / skill 仍支持 Node.js 20+。从仓库根目录安装和运行：
 
 ```bash
 npm ci

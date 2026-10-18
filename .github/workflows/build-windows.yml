@@ -25,7 +25,7 @@ jobs:
           ref: ${{ inputs.release_tag || inputs.source_ref || github.ref }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - name: 安装锁定依赖
         run: npm ci --no-audit --no-fund
