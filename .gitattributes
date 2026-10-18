@@ -1,2 +1,4 @@
 * text=auto eol=lf
 skills/bcc/bin/bcc.cjs linguist-generated=true -whitespace
+THIRD_PARTY_NOTICES.md -whitespace
+skills/bcc/THIRD_PARTY_NOTICES.md -whitespace
