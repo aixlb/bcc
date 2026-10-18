@@ -18,6 +18,10 @@
 
 不改写原桌面发布 tag，不用本次快照覆盖旧发布代码。仓库更名后，维护文档和新发布使用 `aixlb/bcc` 链接；已有下载资产继续保留在同一个 GitHub 仓库中。
 
+迁移后，原 `v2script` 保持私有并归档；原独立 skill 仓库已更名为 `aixlb/bcc-skill-archive`，保持私有并归档。两者 README 均指向新的公开主仓库。保留旧 skill checkout 时，应将其 remote 改到 `bcc-skill-archive`；新的开发直接 clone `aixlb/bcc`。
+
+本次保留了原公开仓库的 8 个 Releases 和 25 个附件，逐项核对了 ID、tag、文件名和大小。源码布局版本为 0.4.0；既有安装包和 npm 版本不会因仓库迁移自动重发，新版本按 [RELEASE.md](RELEASE.md) 的流程发布。
+
 ## 新目录
 
 | 旧目录 | 新目录 |
