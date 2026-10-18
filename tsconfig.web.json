@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
+    "noEmit": true,
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["apps/bcc-desktop/src/renderer/src/*"],
+      "@shared/*": ["packages/bcc-core/src/shared/*"]
+    }
+  },
+  "include": [
+    "apps/bcc-desktop/src/renderer/src/**/*.ts",
+    "apps/bcc-desktop/src/renderer/src/**/*.tsx",
+    "packages/bcc-core/src/shared/**/*.ts"
+  ]
+}

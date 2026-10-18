@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Mac App Store 强制要求：开启 App Sandbox -->
+  <key>com.apple.security.app-sandbox</key>
+  <true/>
+
+  <!-- 允许发起网络请求（调用 Google GenAI / Kimi 等 API） -->
+  <key>com.apple.security.network.client</key>
+  <true/>
+
+  <!-- 允许读写「用户主动选择」的文件（导入视频、导出剧本/分镜表） -->
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+
+  <!-- 允许写入 Downloads（导出文件落地，可选） -->
+  <key>com.apple.security.files.downloads.read-write</key>
+  <true/>
+</dict>
+</plist>
