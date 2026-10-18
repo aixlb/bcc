@@ -2,7 +2,7 @@
 
 把视频拆成**剧本、分镜表和风格指南**。本公开仓库包含桌面版、命令行和 Agent skill，三者共用 `bcc-core`，采用 [MIT 协议](LICENSE)。
 
-Created by **@玩AI的小笼包**。桌面应用继续显示为 **XLB Storyboard**，保留原有应用标识与数据目录，升级后可继续使用已有配置和项目。
+Created by **@玩AI的小笼包**。桌面应用名称为 **XLB Storyboard**。
 
 ## 选择入口
 
@@ -12,8 +12,6 @@ Created by **@玩AI的小笼包**。桌面应用继续显示为 **XLB Storyboard
 | CLI `bcc` | 批量处理、脚本与自动化 | `npm i -g @aixlb/bcc`，需要 Node.js 20+ |
 | Agent skill | 在 Agent 中分析视频，调用本地工具处理素材与导出 | `npx skills add aixlb/bcc --skill bcc` |
 | DSH 插件 | 在 DSH 中使用会话模型和插件界面 | 独立仓库 [aixlb/dsh-bcc](https://github.com/aixlb/dsh-bcc) |
-
-DSH 插件有独立的源码、构建和发布流程，不放在本仓库里。两个仓库均采用 MIT 协议。
 
 ## 能做什么
 
@@ -31,7 +29,7 @@ DSH 插件有独立的源码、构建和发布流程，不放在本仓库里。�
 
 桌面版支持 Gemini、Kimi、MiniMax 和自定义 OpenAI 兼容接口。桌面版代理留空时跟随系统设置；CLI 使用显式配置或 `HTTPS_PROXY` 等环境变量。
 
-迁移保留 `appId=com.xlbstoryboard.app` 和 `productName=XLB Storyboard`，不因仓库更名改变已有用户数据位置。配置和数据的详细兼容约定见 [迁移说明](docs/MIGRATION.md)。
+升级后可继续使用已有配置和项目。
 
 ## CLI
 
@@ -45,7 +43,7 @@ bcc storyboard ./a.mp4 --out 分镜.xlsx
 bcc research a.mp4 b.mp4 --out 风格指南.md
 ```
 
-`--out` 按扩展名推断格式，`--format docx,md,html` 可一次导出多个格式。用 `--data-dir` 或 `BCC_DATA_DIR` 指定数据根目录；默认路径保持与原桌面版兼容。
+`--out` 按扩展名推断格式，`--format docx,md,html` 可一次导出多个格式。用 `--data-dir` 或 `BCC_DATA_DIR` 指定数据根目录。
 
 API 管线命令会调用所配置的模型。Agent 工具命令 `probe` / `shots` / `master` / `export` 只做本地处理，由 Agent 自己的模型负责内容分析：
 
@@ -92,7 +90,7 @@ packages/
 skills/bcc/              Agent skill 文档与自包含运行时
 methods/                 剧本方法论及生成输入
 scripts/                 构建、打包、发布与检查
-docs/                    使用、设计、迁移与发布文档
+docs/                    使用、设计与发布文档
 cli-dist/                npm CLI 包，构建时生成运行文件
 ```
 
@@ -107,15 +105,11 @@ cli-dist/                npm CLI 包，构建时生成运行文件
 | `npm run dist:win` / `npm run dist:mac` | 在对应平台打包到 `release/` |
 | `npm run publish:app` | 上传当前版本桌面包到本仓库 Release |
 
-`publish:skill` 保留为本地构建兼容命令，不再向其他仓库同步。发布步骤见 [docs/RELEASE.md](docs/RELEASE.md)，项目维护约定见 [AGENTS.md](AGENTS.md)。
+`npm run publish:skill` 与 `npm run build:skill` 等效，用于本地构建。发布步骤见 [docs/RELEASE.md](docs/RELEASE.md)，项目维护约定见 [AGENTS.md](AGENTS.md)。
 
 默认配置示例见 [config.example.yaml](config.example.yaml)，模型列表扩展示例见 [models.example.json](models.example.json)。`config.yaml` 含 API Key，不应提交。
 
 剧本提示词位于 `packages/bcc-core/src/services/prompt.ts`，分镜默认值位于 `packages/bcc-core/src/shared/defaults.ts`，研究提示词位于 `packages/bcc-core/src/services/research-prompt.ts`。分镜固定 JSON 契约由程序追加。
-
-## 仓库迁移
-
-本仓库由原 `aixlb/XLBstoryboard` 更名，保留既有 Releases 与 tag；0.4.0 将原 `v2script` 桌面 / CLI 源码和原 `bcc` skill 集中到这里，后续直接在本仓库维护。历史源码基线和旧仓库去向见 [docs/MIGRATION.md](docs/MIGRATION.md)。
 
 ## License
 

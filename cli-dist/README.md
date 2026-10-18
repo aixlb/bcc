@@ -1,6 +1,6 @@
 # bcc — 包拆拆命令行
 
-把视频转成**剧本**(docx/md/html)、**分镜表**(xlsx/html)或**风格指南**(md)的纯 Node 命令行。两种用法：配 API Key 全自动跑（原管线），或作为 Agent skill 的无模型工具链（`npx skills add aixlb/bcc`）。
+把视频转成**剧本**(docx/md/html)、**分镜表**(xlsx/html)或**风格指南**(md)的纯 Node 命令行。两种用法：配 API Key 全自动跑，或作为 Agent skill 的无模型工具链（`npx skills add aixlb/bcc`）。
 
 ## 安装
 
@@ -49,4 +49,4 @@ bcc export storyboard --from 分镜.json --out 分镜.xlsx --video a.mp4
 
 ## 源码与许可
 
-[aixlb/bcc](https://github.com/aixlb/bcc) 同时包含桌面版、CLI、共用核心和 Agent skill，采用 [MIT 协议](https://github.com/aixlb/bcc/blob/main/LICENSE)。npm 包名与桌面应用数据位置保持兼容。
+[aixlb/bcc](https://github.com/aixlb/bcc) 同时包含桌面版、CLI、共用核心和 Agent skill，采用 [MIT 协议](https://github.com/aixlb/bcc/blob/main/LICENSE)。
