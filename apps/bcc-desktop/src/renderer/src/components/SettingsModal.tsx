@@ -29,7 +29,7 @@ import { LogoIcon } from './LogoIcon'
 import type { AppConfig, CustomProvider } from '@shared/types'
 import { STORYBOARD_DEFAULT_ANALYSIS_PROMPT } from '@shared/defaults'
 import { BUILTIN_MASTERS } from '@shared/masters-meta'
-import { BUILTIN_MODEL_PRESETS, type ModelPresetMap } from '@shared/model-presets'
+import { BUILTIN_MODEL_PRESETS, PROVIDER_TEMPLATES, type ModelPresetMap, type ProviderTemplate } from '@shared/model-presets'
 
 
 type Tab = 'api' | 'feature' | 'masters' | 'about'
@@ -40,6 +40,7 @@ interface ProviderFormState {
   api_key: string
   base_url: string
   model: string
+  script_input: 'video' | 'frames'
 }
 
 export function SettingsModal() {
@@ -148,28 +149,28 @@ export function SettingsModal() {
   }
 
   // 自定义供应商
-  const openNewProviderForm = () => {
-    setProviderForm({ id: null, name: '', api_key: '', base_url: '', model: '' })
+  const openNewProviderForm = (template?: ProviderTemplate) => {
+    setProviderForm({ id: null, name: template?.name ?? '', api_key: '', base_url: template?.base_url ?? '', model: template?.model ?? '', script_input: template?.script_input ?? 'video' })
     setShowProviderKey(false)
     setCustomTestResult(null)
   }
 
   const openEditProviderForm = (p: CustomProvider) => {
-    setProviderForm({ id: p.id, name: p.name, api_key: p.api_key, base_url: p.base_url, model: p.model })
+    setProviderForm({ id: p.id, name: p.name, api_key: p.api_key, base_url: p.base_url, model: p.model, script_input: p.script_input ?? 'video' })
     setShowProviderKey(false)
     setCustomTestResult(null)
   }
 
   const saveProviderForm = () => {
     if (!draft || !providerForm || !providerForm.name.trim()) return
-    const { id, name, api_key, base_url, model } = providerForm
+    const { id, name, api_key, base_url, model, script_input } = providerForm
     if (id === null) {
       const newId = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now().toString(36)
-      setDraft({ ...draft, custom_providers: [...draft.custom_providers, { id: newId, name: name.trim(), api_key, base_url, model }] })
+      setDraft({ ...draft, custom_providers: [...draft.custom_providers, { id: newId, name: name.trim(), api_key, base_url, model, script_input }] })
     } else {
       setDraft({
         ...draft,
-        custom_providers: draft.custom_providers.map((p) => p.id === id ? { id, name: name.trim(), api_key, base_url, model } : p),
+        custom_providers: draft.custom_providers.map((p) => p.id === id ? { id, name: name.trim(), api_key, base_url, model, script_input } : p),
       })
     }
     setProviderForm(null)
@@ -545,7 +546,7 @@ function ApiTab({
   testingCustomId: string | null
   customTestResult: { id: string; ok: boolean; message: string } | null
   onProviderFormChange: (f: ProviderFormState) => void
-  onOpenNewProviderForm: () => void
+  onOpenNewProviderForm: (template?: ProviderTemplate) => void
   onOpenEditProviderForm: (p: CustomProvider) => void
   onSaveProviderForm: () => void
   onCancelProviderForm: () => void
@@ -814,7 +815,7 @@ function ApiTab({
       {/* 自定义供应商 */}
       <Section title="自定义供应商" icon={<Cpu className="h-4 w-4" />}>
         <p className="text-[11px] text-zinc-500">
-          支持任意 OpenAI 兼容接口（MiniMax、GLM-4V、Qwen-VL、SiliconFlow 等），可在「功能配置」中用于分镜表图像分析。
+          支持 OpenAI 兼容接口，可用于剧本、分镜和风格研究。DeepSeek 等仅支持图像输入的模型，请选择「关键帧图片」。
         </p>
         <div className="space-y-2">
           {draft.custom_providers.map((p) =>
@@ -850,8 +851,14 @@ function ApiTab({
               onCancel={onCancelProviderForm}
             />
           )}
+          {!providerForm && PROVIDER_TEMPLATES.map((template) => (
+            <button key={template.id} onClick={() => onOpenNewProviderForm(template)} className="flex items-center gap-1 text-xs text-accent hover:text-zinc-200" type="button">
+              <Plus className="h-3.5 w-3.5" />
+              添加 {template.name}
+            </button>
+          ))}
           {!providerForm && (
-            <button onClick={onOpenNewProviderForm} className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-200" type="button">
+            <button onClick={() => onOpenNewProviderForm()} className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-200" type="button">
               <Plus className="h-3.5 w-3.5" />
               添加供应商
             </button>
@@ -889,7 +896,7 @@ function FeatureTab({
     { id: 'minimax', label: 'MiniMax-M3', desc: '上传视频理解，推理较慢但便宜' },
     { id: 'openai', label: 'OpenAI (ChatGPT)', desc: '关键帧多图分析，无音频理解' },
     { id: 'anthropic', label: 'Anthropic (Claude)', desc: '关键帧多图分析，推理最强，无音频理解' },
-    ...draft.custom_providers.map((p) => ({ id: p.id, label: p.name, desc: `${p.model} · base64 内联视频` })),
+    ...draft.custom_providers.map((p) => ({ id: p.id, label: p.name, desc: `${p.model} · ${p.script_input === 'frames' ? '关键帧图片分析' : '视频直传'}` })),
   ]
   const storyboardProviderOptions = [
     { id: 'gemini', label: 'Gemini', desc: '速度快，成本低' },
@@ -1251,6 +1258,12 @@ function ProviderFormCard({ form, showKey, onToggleKey, onChange, onSave, onCanc
         </div>
         <input type="text" value={form.base_url} onChange={(e) => onChange({ ...form, base_url: e.target.value })} placeholder="Base URL（如 https://api.minimax.io/v1）" className="input-field font-mono" spellCheck={false} />
         <input type="text" value={form.model} onChange={(e) => onChange({ ...form, model: e.target.value })} placeholder="模型名（如 MiniMax-M3）" className="input-field font-mono" />
+        <Field label="拆剧本的输入方式">
+          <select value={form.script_input} onChange={(e) => onChange({ ...form, script_input: e.target.value as 'video' | 'frames' })} className="input-field">
+            <option value="video">整段视频（模型需支持视频输入）</option>
+            <option value="frames">关键帧图片（DeepSeek 等图像模型，无音频）</option>
+          </select>
+        </Field>
       </div>
       <div className="mt-3 flex items-center gap-2">
         <button onClick={onSave} disabled={!form.name.trim()} className="btn-primary flex items-center gap-1" type="button">

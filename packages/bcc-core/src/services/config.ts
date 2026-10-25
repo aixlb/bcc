@@ -1,3 +1,4 @@
+import { DEFAULT_MODELS } from '@shared/model-presets'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import yaml from 'js-yaml'
@@ -7,28 +8,28 @@ import { getDataRoot } from './paths'
 const DEFAULT_CONFIG: AppConfig = {
   gemini: {
     api_key: '',
-    model: 'gemini-3.5-flash',
+    model: DEFAULT_MODELS.gemini,
     video_resolution: 'low',
     proxy: '',
   },
   kimi: {
     api_key: '',
-    model: 'kimi-k3',
+    model: DEFAULT_MODELS.kimi,
     base_url: '',
   },
   minimax: {
     api_key: '',
-    model: 'MiniMax-M3',
+    model: DEFAULT_MODELS.minimax,
     base_url: '',
   },
   openai: {
     api_key: '',
-    model: 'gpt-5.6',
+    model: DEFAULT_MODELS.openai,
     base_url: '',
   },
   anthropic: {
     api_key: '',
-    model: 'claude-fable-5',
+    model: DEFAULT_MODELS.anthropic,
     base_url: '',
   },
   custom_providers: [],

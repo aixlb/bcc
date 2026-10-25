@@ -107,7 +107,7 @@ cli-dist/                npm CLI 包，构建时生成运行文件
 
 `npm run publish:skill` 与 `npm run build:skill` 等效，用于本地构建。发布步骤见 [docs/RELEASE.md](docs/RELEASE.md)，项目维护约定见 [AGENTS.md](AGENTS.md)。
 
-默认配置示例见 [config.example.yaml](config.example.yaml)，模型列表扩展示例见 [models.example.json](models.example.json)。`config.yaml` 含 API Key，不应提交。
+默认配置示例见 [config.example.yaml](config.example.yaml)，模型列表扩展示例见 [models.example.json](models.example.json)。新增模型、DeepSeek 配置及维护方式见 [模型配置说明](docs/MODELS.md)。`config.yaml` 含 API Key，不应提交。
 
 剧本提示词位于 `packages/bcc-core/src/services/prompt.ts`，分镜默认值位于 `packages/bcc-core/src/shared/defaults.ts`，研究提示词位于 `packages/bcc-core/src/services/research-prompt.ts`。分镜固定 JSON 契约由程序追加。
 

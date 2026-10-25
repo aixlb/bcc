@@ -1,10 +1,13 @@
+import catalog from './model-catalog.json'
+import type { CustomProvider } from './types'
+
 /**
  * 模型预设清单（GUI「模型」下拉用）。内置默认值 + 可被数据目录下的 models.json 覆盖/扩展。
  *
  * 设计动机：以前每加一个新模型都要改源码再发版；现在用户可在 config.yaml 同目录放一个
- * models.json，免升级即可增删模型下拉项（合并语义见 mergeModelPresets）。
+ * models.json，免升级即可新增或覆盖模型下拉项（合并语义见 mergeModelPresets）。
  *
- * 注意：本清单仅影响 GUI 的下拉预设；实际调用的模型是配置里保存的那个字符串。
+ * 外部 models.json 仅影响 GUI 的下拉预设；实际调用的模型是配置里保存的那个字符串。
  * CLI 一直支持任意模型名（`bcc config set gemini.model <任意值>`），不依赖本清单。
  */
 
@@ -24,30 +27,21 @@ export type ModelPresetMap = Record<BuiltinProviderKey, ModelPreset[]>
 
 export const BUILTIN_PROVIDER_KEYS: BuiltinProviderKey[] = ['gemini', 'kimi', 'minimax', 'openai', 'anthropic']
 
-/**
- * 内置默认预设（随版本发布；models.json 缺失或解析失败时即用这套）。
- * Gemini 只保留官方在用的最新两个（gemini-3.1-flash-lite-preview / gemini-3-pro-preview 等已被 Google 下线）。
- */
-export const BUILTIN_MODEL_PRESETS: ModelPresetMap = {
-  gemini: [
-    { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash', desc: '推荐：最新主力 flash，1M 上下文，快且便宜' },
-    { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash-Lite', desc: '最便宜最快，适合批量任务' },
-  ],
-  kimi: [
-    { value: 'kimi-k3', label: 'Kimi K3', desc: '推荐：最新一代，支持视频/图像理解' },
-    { value: 'kimi-k2.7-code', label: 'Kimi K2.7', desc: '支持视频/图像理解，推理能力强' },
-    { value: 'kimi-k2.7-code-highspeed', label: 'Kimi K2.7 高速版', desc: '同 K2.7，出字更快但更贵' },
-  ],
-  minimax: [
-    { value: 'MiniMax-M3', label: 'MiniMax-M3', desc: '原生多模态，支持视频理解，1M 上下文' },
-  ],
-  openai: [
-    { value: 'gpt-5.6', label: 'GPT-5.6', desc: '推荐：最新旗舰多模态，剧本走关键帧多图分析' },
-    { value: 'gpt-5.5', label: 'GPT-5.5', desc: '上一代主力多模态，剧本走关键帧多图分析' },
-  ],
-  anthropic: [
-    { value: 'claude-fable-5', label: 'Claude Fable 5', desc: '最强推理与视觉理解，剧本走关键帧多图分析' },
-  ],
+/** 官方模型目录、默认值、供应商模板与请求规则只维护 model-catalog.json。 */
+export const BUILTIN_MODEL_PRESETS: ModelPresetMap = catalog.presets
+export const DEFAULT_MODELS: Record<BuiltinProviderKey, string> = catalog.defaults
+export type ProviderTemplate = Omit<CustomProvider, 'api_key'>
+export const PROVIDER_TEMPLATES = catalog.providerTemplates as ProviderTemplate[]
+
+const requestRules = catalog.openaiRequestRules.map((rule) => ({
+  pattern: new RegExp(rule.modelPattern),
+  parameters: rule.parameters,
+}))
+
+/** 三条分析管线共享同一套模型请求参数，未知模型沿用供应商默认值。 */
+export function getOpenAIRequestDefaults(model: string): Record<string, unknown> {
+  const parameters = requestRules.find((rule) => rule.pattern.test(model.trim()))?.parameters
+  return parameters ? { ...parameters } : {}
 }
 
 /** 把任意来源的数据宽松规整成 ModelPreset（容忍缺 label/desc）；不合法返回 null。 */

@@ -2,6 +2,14 @@
 
 本文件记录「包拆拆 / XLB Storyboard」（视频转剧本 / 分镜工具）的主要功能改动。
 
+## 0.4.1 - 2026-10-25
+
+- 新增 Gemini 4 Argon（`gemini-4-argon`）和 Kimi K3.1 Pro（`kimi-k3.1-pro`）模型预设，桌面版与 CLI 共用适配。
+- 新增 DeepSeek V4.1 Flash 1017 供应商模板，使用官方 `deepseek-flash` 别名；剧本通过关键帧图片分析，分镜和风格合成继续使用图片。
+- 自定义 OpenAI 兼容供应商支持选择剧本输入方式：内联视频或关键帧图片；旧配置保留原有行为。仅有图片时明确限制台词来源，避免编造对白。
+- 模型清单、默认值、供应商模板和共用请求参数集中到 `model-catalog.json`；本地 `models.json` 仍可免升级扩展模型下拉。
+- 更新模型配置文档并重建自包含 skill 运行时，保留已有模型选择、应用安装身份和数据位置。
+
 ## 0.4.0 - 2026-10-18
 
 - 公开主仓库统一为 `aixlb/bcc`，采用 MIT 协议；沿用原 `XLBstoryboard` 仓库与已有 Releases，集中桌面版、CLI、共用核心和 Agent skill。

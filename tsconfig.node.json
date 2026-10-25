@@ -24,6 +24,7 @@
     "apps/bcc-desktop/src/main/**/*.ts",
     "apps/bcc-desktop/src/preload/**/*.ts",
     "apps/bcc-cli/src/**/*.ts",
-    "packages/bcc-core/src/**/*.ts"
+    "packages/bcc-core/src/**/*.ts",
+    "packages/bcc-core/src/shared/**/*.json"
   ]
 }

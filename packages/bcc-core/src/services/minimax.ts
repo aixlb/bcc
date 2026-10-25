@@ -17,6 +17,7 @@
  */
 
 import fs from 'node:fs/promises'
+import { DEFAULT_MODELS } from '@shared/model-presets'
 import path from 'node:path'
 import type { MinimaxConfig } from '@shared/types'
 import { buildScriptPrompt, SCRIPT_SYSTEM_PROMPT } from './prompt.js'
@@ -74,7 +75,7 @@ export class MinimaxService {
           Authorization: `Bearer ${this.config.api_key}`,
         },
         body: JSON.stringify({
-          model: this.config.model || 'MiniMax-M3',
+          model: this.config.model || DEFAULT_MODELS.minimax,
           messages: [{ role: 'user', content: 'ping' }],
           max_tokens: 1,
           stream: false,
@@ -94,7 +95,7 @@ export class MinimaxService {
       } catch {
         /* 非 JSON 也视为可达 */
       }
-      return { ok: true, message: `连接成功（${this.config.model || 'MiniMax-M3'}）` }
+      return { ok: true, message: `连接成功（${this.config.model || DEFAULT_MODELS.minimax}）` }
     } catch (err: any) {
       return { ok: false, message: explainError(err) }
     }
@@ -111,7 +112,7 @@ export class MinimaxService {
 
     this.log = createLogger('minimax', String(Date.now()))
     this.log.info(
-      `=== MiniMax 生成剧本 === model=${this.config.model || 'MiniMax-M3'} baseUrl=${this.baseUrl} ` +
+      `=== MiniMax 生成剧本 === model=${this.config.model || DEFAULT_MODELS.minimax} baseUrl=${this.baseUrl} ` +
         `video=${path.basename(videoPath)} size=${formatBytes(videoInfo.sizeBytes)} ` +
         `dur=${videoInfo.durationSec.toFixed(0)}s ${videoInfo.width}x${videoInfo.height}`
     )
@@ -281,7 +282,7 @@ export class MinimaxService {
     const { signal } = cb
     const url = `${this.baseUrl}/chat/completions`
     const body = {
-      model: this.config.model || 'MiniMax-M3',
+      model: this.config.model || DEFAULT_MODELS.minimax,
       messages: [
         { role: 'system', content: systemPrompt || SCRIPT_SYSTEM_PROMPT },
         {

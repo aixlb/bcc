@@ -16,6 +16,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { KimiConfig } from '@shared/types'
+import { DEFAULT_MODELS, getOpenAIRequestDefaults } from '@shared/model-presets'
 import { buildScriptPrompt, SCRIPT_SYSTEM_PROMPT } from './prompt.js'
 import { compressIfNeeded, formatBytes, type VideoInfo } from './video.js'
 import { fetchWithOverloadRetry } from './http-retry.js'
@@ -93,7 +94,7 @@ export class KimiService {
 
     this.log = createLogger('kimi', String(Date.now()))
     this.log.info(
-      `=== Kimi 生成剧本 === model=${this.config.model || 'kimi-k3'} baseUrl=${this.baseUrl} ` +
+      `=== Kimi 生成剧本 === model=${this.config.model || DEFAULT_MODELS.kimi} baseUrl=${this.baseUrl} ` +
         `video=${path.basename(videoPath)} size=${formatBytes(videoInfo.sizeBytes)} ` +
         `dur=${videoInfo.durationSec.toFixed(0)}s ${videoInfo.width}x${videoInfo.height}`
     )
@@ -267,7 +268,7 @@ export class KimiService {
     const { signal } = cb
 
     const url = `${this.baseUrl}/chat/completions`
-    const model = this.config.model || 'kimi-k3'
+    const model = this.config.model || DEFAULT_MODELS.kimi
     const body = {
       model,
       messages: [
@@ -284,7 +285,7 @@ export class KimiService {
       ],
       stream: true,
       stream_options: { include_usage: true },
-      ...(model === 'kimi-k3' ? { reasoning_effort: 'max' } : {}),
+      ...getOpenAIRequestDefaults(model),
     }
 
     this.log.info(

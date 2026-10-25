@@ -23,8 +23,9 @@ import { formatHMS, type VideoInfo } from './video.js'
 import { createLogger, NOOP_LOGGER, type DebugLogger } from './logger.js'
 import { scaleTimestamps, stripCodeFences } from './script-postprocess.js'
 import type { GenerationCallbacks } from './openai-script.js'
+import { DEFAULT_MODELS } from '@shared/model-presets'
 
-export const ANTHROPIC_DEFAULT_MODEL = 'claude-fable-5'
+export const ANTHROPIC_DEFAULT_MODEL = DEFAULT_MODELS.anthropic
 /** 拒答兜底模型（Fable 5 官方推荐的 fallback 目标） */
 const REFUSAL_FALLBACK_MODEL = 'claude-opus-4-8'
 const SERVER_SIDE_FALLBACK_BETA = 'server-side-fallback-2026-06-01'

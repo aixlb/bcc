@@ -1,55 +1,39 @@
 import { describe, it, expect } from 'vitest'
 import {
   BUILTIN_MODEL_PRESETS,
+  DEFAULT_MODELS,
   mergeModelPresets,
   type ModelPresetMap,
 } from '@shared/model-presets'
 
-describe('BUILTIN_MODEL_PRESETS', () => {
-  it('Gemini 只保留最新两个模型', () => {
-    expect(BUILTIN_MODEL_PRESETS.gemini.map((m) => m.value)).toEqual([
-      'gemini-3.5-flash',
-      'gemini-3.1-flash-lite',
-    ])
-  })
-
-  it('已下线的旧 Gemini 模型不再出现在预设里', () => {
-    const values = BUILTIN_MODEL_PRESETS.gemini.map((m) => m.value)
-    expect(values).not.toContain('gemini-3.1-flash-lite-preview')
-    expect(values).not.toContain('gemini-3-flash-preview')
-    expect(values).not.toContain('gemini-3-pro-preview')
-    expect(values).not.toContain('gemini-2.5-flash')
-  })
-
-  it('Anthropic 预设只保留最新主力模型', () => {
-    expect(BUILTIN_MODEL_PRESETS.anthropic.map((m) => m.value)).toEqual(['claude-fable-5'])
-  })
-
-  it('OpenAI 以 GPT-5.6 为推荐并保留 GPT-5.5', () => {
-    expect(BUILTIN_MODEL_PRESETS.openai.map((m) => m.value)).toEqual(['gpt-5.6', 'gpt-5.5'])
-  })
-
-  it('Kimi 支持 K3，且不再内置 K2.7 以前的模型', () => {
-    expect(BUILTIN_MODEL_PRESETS.kimi.map((m) => m.value)).toEqual([
-      'kimi-k3',
-      'kimi-k2.7-code',
-      'kimi-k2.7-code-highspeed',
-    ])
-    expect(BUILTIN_MODEL_PRESETS.kimi).not.toContainEqual(expect.objectContaining({ value: 'kimi-k2.6' }))
-    expect(BUILTIN_MODEL_PRESETS.kimi).not.toContainEqual(expect.objectContaining({ value: 'kimi-k2.5' }))
+describe('模型目录完整性', () => {
+  it('每个供应商的模型 ID 唯一，默认模型存在且每项有名称', () => {
+    for (const [provider, presets] of Object.entries(BUILTIN_MODEL_PRESETS)) {
+      expect(new Set(presets.map((preset) => preset.value)).size).toBe(presets.length)
+      expect(presets.some((preset) => preset.value === DEFAULT_MODELS[provider as keyof typeof DEFAULT_MODELS])).toBe(true)
+      expect(presets.every((preset) => preset.value.trim() && preset.label.trim())).toBe(true)
+    }
   })
 })
 
 describe('mergeModelPresets — 扩展 + 覆盖', () => {
+  // 合并行为使用固定夹具，日后增删正式模型只需修改 JSON 目录。
+  const builtin: ModelPresetMap = {
+    ...BUILTIN_MODEL_PRESETS,
+    gemini: [
+      { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash', desc: 'Flash' },
+      { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash-Lite', desc: 'Lite' },
+    ],
+  }
   it('override 为 null/缺省时原样返回内置（深拷贝，不串改）', () => {
-    const merged = mergeModelPresets(BUILTIN_MODEL_PRESETS, null)
+    const merged = mergeModelPresets(builtin, null)
     expect(merged.gemini.map((m) => m.value)).toEqual(['gemini-3.5-flash', 'gemini-3.1-flash-lite'])
     merged.gemini[0].label = '改了'
-    expect(BUILTIN_MODEL_PRESETS.gemini[0].label).not.toBe('改了')
+    expect(builtin.gemini[0].label).not.toBe('改了')
   })
 
   it('同名 value 覆盖 label/desc 且保持原顺序', () => {
-    const merged = mergeModelPresets(BUILTIN_MODEL_PRESETS, {
+    const merged = mergeModelPresets(builtin, {
       gemini: [{ value: 'gemini-3.5-flash', label: '我的 3.5', desc: '自定义说明' }],
     })
     expect(merged.gemini[0]).toEqual({ value: 'gemini-3.5-flash', label: '我的 3.5', desc: '自定义说明' })
@@ -57,7 +41,7 @@ describe('mergeModelPresets — 扩展 + 覆盖', () => {
   })
 
   it('新 value 追加到列表末尾', () => {
-    const merged = mergeModelPresets(BUILTIN_MODEL_PRESETS, {
+    const merged = mergeModelPresets(builtin, {
       gemini: [{ value: 'gemini-4.0-flash', label: 'Gemini 4 Flash', desc: '将来的模型' }],
     })
     expect(merged.gemini.map((m) => m.value)).toEqual([
@@ -68,7 +52,7 @@ describe('mergeModelPresets — 扩展 + 覆盖', () => {
   })
 
   it('缺 label 时回退用 value；缺 desc 时为空串', () => {
-    const merged = mergeModelPresets(BUILTIN_MODEL_PRESETS, {
+    const merged = mergeModelPresets(builtin, {
       kimi: [{ value: 'kimi-k3.1' }],
     })
     const added = merged.kimi.find((m) => m.value === 'kimi-k3.1')
@@ -76,19 +60,19 @@ describe('mergeModelPresets — 扩展 + 覆盖', () => {
   })
 
   it('忽略非法条目（缺 value / 非对象），不抛错', () => {
-    const merged = mergeModelPresets(BUILTIN_MODEL_PRESETS, {
+    const merged = mergeModelPresets(builtin, {
       gemini: [null, 42, { label: '没有 value' }, { value: '   ' }],
     } as unknown as Record<string, unknown>)
     expect(merged.gemini.map((m) => m.value)).toEqual(['gemini-3.5-flash', 'gemini-3.1-flash-lite'])
   })
 
   it('删不掉内置项（override 不含某内置 value 时它仍在）', () => {
-    const merged = mergeModelPresets(BUILTIN_MODEL_PRESETS, { gemini: [] })
+    const merged = mergeModelPresets(builtin, { gemini: [] })
     expect(merged.gemini.length).toBe(2)
   })
 
   it('同一 value 在 override 中多次出现以最后一次为准', () => {
-    const merged = mergeModelPresets(BUILTIN_MODEL_PRESETS, {
+    const merged = mergeModelPresets(builtin, {
       minimax: [
         { value: 'MiniMax-M4', label: '第一次', desc: 'a' },
         { value: 'MiniMax-M4', label: '最后一次', desc: 'b' },
@@ -100,7 +84,7 @@ describe('mergeModelPresets — 扩展 + 覆盖', () => {
   })
 
   it('未知供应商键被忽略，五个内置键始终存在', () => {
-    const merged: ModelPresetMap = mergeModelPresets(BUILTIN_MODEL_PRESETS, {
+    const merged: ModelPresetMap = mergeModelPresets(builtin, {
       somethingElse: [{ value: 'x', label: 'x', desc: '' }],
     })
     expect(Object.keys(merged).sort()).toEqual(['anthropic', 'gemini', 'kimi', 'minimax', 'openai'])

@@ -4,13 +4,13 @@
 
 gemini:
   api_key: ""                      # Gemini API Key（必填）申请：https://aistudio.google.com/apikey
-  model: "gemini-3.5-flash"        # 模型名（可在设置页切换）
+  model: "gemini-3.5-flash"        # 也可选 gemini-4-argon（Gemini 4）
   video_resolution: "low"          # low: 省 token / high: 细节更好
   proxy: ""                        # 留空 = 跟随系统/Chrome 代理（推荐）；强制指定才填 http://127.0.0.1:7890
 
 kimi:
   api_key: ""                      # Moonshot Kimi API Key
-  model: "kimi-k3"
+  model: "kimi-k3"                 # 也可选 kimi-k3.1-pro
   # base_url: ""                   # 内置供应商无需配置（固定官方端点）；仅自定义供应商需要 base_url
 
 minimax:
@@ -27,6 +27,15 @@ anthropic:
   api_key: ""                      # Anthropic (Claude) API Key，platform.claude.com
   model: "claude-fable-5"          # 剧本走关键帧多图分析（官方接口不收视频，无音频理解）
   # base_url: ""                   # 留空 = 官方端点；网关/代理场景才填
+
+# DeepSeek V4.1 Flash 1017：在设置页点「添加 DeepSeek」，或取消注释后填 Key。
+# custom_providers:
+#   - id: "deepseek"
+#     name: "DeepSeek V4.1 Flash 1017"
+#     api_key: ""
+#     base_url: "https://api.deepseek.com/v1"
+#     model: "deepseek-flash"       # 官方滚动别名，当前对应 1017
+#     script_input: "frames"       # 图片关键帧；不发送视频或音频
 
 script_provider: "gemini"          # 剧本生成用哪个：gemini | kimi | minimax | openai | anthropic | 自定义供应商 id
 script_master: ""                  # 剧本大师：留空 = 默认；"shanzhiyin" = 山之音（生成剧本时注入其方法论）

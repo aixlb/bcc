@@ -1,6 +1,6 @@
 # 包拆拆 / XLB Storyboard 用户手册
 
-> 适用版本：0.4.0（保留原有桌面交互与数据位置）
+> 适用版本：0.4.1（保留原有桌面交互与数据位置）
 > 完整在线手册：包拆拆用户手册（飞书）— https://nepelfbn8c.feishu.cn/wiki/HV1twBUy6il5CVkcNxscJbFGnAd
 
 「包拆拆」是一款把视频拆成**剧本**与**分镜**的桌面工具（Electron）。本手册随每次版本合并更新，记录当前版本的使用方式。
@@ -11,6 +11,8 @@
 
 1. 打开「设置」，填入所用模型的 API Key（剧本 / 分镜可分别选用不同 provider：Gemini / Kimi / MiniMax-M3 / 自定义 OpenAI 兼容供应商）。
 2. 没有 Key 时对应的「拆剧本 / 拆分镜」按钮会被禁用。
+
+Gemini 4 和 Kimi K3.1 Pro 已列入模型下拉。DeepSeek V4.1 Flash 1017 可在「自定义供应商」中点击「添加 DeepSeek」，填 Key 后保存，再到「功能配置」选择它。模型 ID、CLI 用法与免升级扩展方式见 [模型配置说明](MODELS.md)。
 
 ## 2. 拆剧本
 

@@ -49,6 +49,8 @@ export interface CustomProvider {
   api_key: string
   base_url: string
   model: string
+  /** 剧本输入：video = 整段视频（兼容旧配置）；frames = 采样关键帧，适合 DeepSeek 等图像模型。 */
+  script_input?: 'video' | 'frames'
 }
 
 /** 分镜切割方式：smart 混合检测（硬切/白闪/锋面/叠化 + 长镜头覆盖补帧）/ scene ffmpeg 帧差阈值法 */

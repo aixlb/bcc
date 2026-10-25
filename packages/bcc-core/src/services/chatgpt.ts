@@ -1,9 +1,10 @@
 /**
- * OpenAI (ChatGPT) 官方 GPT API —— 视频生成剧本服务
+ * OpenAI 兼容图片模型 —— 关键帧生成剧本服务
  *
  * OpenAI 的 chat/completions 不接受视频输入（无 video_url / 视频文件上传），
  * 因此走「关键帧采样 + 多图 + 时间戳」：按固定间隔均匀抽帧，每帧前标注 [HH:MM:SS]，
- * 交给 GPT 多模态模型产出带时间戳的剧本。局限：没有音频理解，台词依赖画面字幕/口型推断。
+ * 交给多模态模型产出带时间戳的剧本。也供 DeepSeek 等图片供应商复用。
+ * 没有音频输入，台词只依据可见字幕或用户提供的文本。
  *
  * 与自定义供应商（openai-script 的 base64 内联视频）互补：官方 OpenAI 端点只能走本服务。
  * 参数注意：不传 temperature，也不设置应用级输出 token 上限，由模型按服务端能力生成。
@@ -12,7 +13,8 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import type { ConnectionTestResult, OpenAIConfig } from '@shared/types'
+import type { ConnectionTestResult, CustomProvider, OpenAIConfig } from '@shared/types'
+import { DEFAULT_MODELS, getOpenAIRequestDefaults } from '@shared/model-presets'
 import { buildScriptPrompt, SCRIPT_SYSTEM_PROMPT } from './prompt.js'
 import { extractFrame } from './storyboard.js'
 import { formatHMS, type VideoInfo } from './video.js'
@@ -25,7 +27,7 @@ import {
 } from './openai-script.js'
 
 export const OPENAI_DEFAULT_BASE_URL = 'https://api.openai.com/v1'
-export const OPENAI_DEFAULT_MODEL = 'gpt-5.6'
+export const OPENAI_DEFAULT_MODEL = DEFAULT_MODELS.openai
 
 /** 关键帧采样上限 / 最小间隔：多图 token 成本与时间覆盖率的折中 */
 const MAX_FRAMES = 24
@@ -35,9 +37,13 @@ export class ChatGPTService {
   private baseUrl: string
   private log: DebugLogger = NOOP_LOGGER
 
-  constructor(private cfg: OpenAIConfig) {
+  constructor(private cfg: OpenAIConfig | CustomProvider, private providerName = 'OpenAI') {
     if (!cfg.api_key) {
-      throw new Error('OpenAI API Key 未配置，请到设置页填写')
+      throw new Error(`${providerName} API Key 未配置，请到设置页填写`)
+    }
+    if ('id' in cfg) {
+      if (!cfg.base_url?.trim()) throw new Error(`${providerName} Base URL 未配置`)
+      if (!cfg.model?.trim()) throw new Error(`${providerName} 模型名未配置`)
     }
     this.baseUrl = (cfg.base_url?.trim() || OPENAI_DEFAULT_BASE_URL).replace(/\/$/, '')
   }
@@ -54,7 +60,7 @@ export class ChatGPTService {
 
     this.log = createLogger('chatgpt-script', String(Date.now()))
     this.log.info(
-      `=== OpenAI 生成剧本 === model=${model} baseUrl=${this.baseUrl} ` +
+      `=== ${this.providerName} 生成剧本 === model=${model} baseUrl=${this.baseUrl} ` +
         `video=${path.basename(videoPath)} dur=${videoInfo.durationSec.toFixed(0)}s`
     )
     if (this.log.filePath) callbacks.onStatus?.('preparing', `诊断日志: ${this.log.filePath}`)
@@ -82,7 +88,8 @@ export class ChatGPTService {
             `【输入说明】以下是从视频按时间顺序均匀抽取的 ${times.length} 张关键帧，` +
             `每张图片前标注了它在视频中的时间戳。请结合相邻帧的差异推断场景切换与叙事节奏；` +
             `剧本中的时间戳必须落在 00:00:00 ~ ${formatHMS(videoInfo.durationSec)} 范围内。` +
-            `画面中出现的字幕文字是台词的直接依据。`,
+            `本次输入只有静态图片，没有音频。台词只依据可见字幕或用户提供的文本，` +
+            `不能根据口型、动作或常识编造对白、旁白、画外音；没有依据时写【画面未见对白】。`,
         },
       ]
       callbacks.onStatus?.('uploading', `抽取并编码 ${times.length} 帧...`)
@@ -103,14 +110,14 @@ export class ChatGPTService {
       // 3. 流式生成（不传 temperature / token 上限）
       callbacks.onStatus?.('generating', '开始生成剧本...')
       const raw = await streamOpenAIChatCompletion(
-        { name: 'OpenAI', apiKey: this.cfg.api_key, baseUrl: this.baseUrl, model },
+        { name: this.providerName, apiKey: this.cfg.api_key, baseUrl: this.baseUrl, model },
         [
           { role: 'system', content: systemPrompt || SCRIPT_SYSTEM_PROMPT },
           { role: 'user', content: parts },
         ],
         {
-          // 剧本提取是明确的结构化任务，low 足够并能把更多输出空间留给正文。
-          extraBody: /^gpt-5(?:\.|$)/.test(model) ? { reasoning_effort: 'low' } : undefined,
+          // 与分镜、风格合成共用目录中的供应商参数。
+          extraBody: getOpenAIRequestDefaults(model),
           log: this.log,
         },
         callbacks

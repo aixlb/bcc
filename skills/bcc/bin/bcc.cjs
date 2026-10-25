@@ -116790,6 +116790,66 @@ function getProxyResolver() {
   return proxyResolver;
 }
 
+// packages/bcc-core/src/shared/model-catalog.json
+var model_catalog_default = {
+  defaults: {
+    gemini: "gemini-3.5-flash",
+    kimi: "kimi-k3",
+    minimax: "MiniMax-M3",
+    openai: "gpt-5.6",
+    anthropic: "claude-fable-5"
+  },
+  presets: {
+    gemini: [
+      { value: "gemini-4-argon", label: "Gemini 4 Argon", desc: "\u65D7\u8230\u63A8\u7406\u6A21\u578B\uFF0C\u652F\u6301\u89C6\u9891\u3001\u56FE\u50CF\u548C\u97F3\u9891\u8F93\u5165" },
+      { value: "gemini-3.5-flash", label: "Gemini 3.5 Flash", desc: "\u73B0\u6709\u4E3B\u529B Flash\uFF0C\u517C\u5BB9\u5DF2\u4FDD\u5B58\u914D\u7F6E" },
+      { value: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite", desc: "\u8F7B\u91CF\u6A21\u578B\uFF0C\u9002\u5408\u6279\u91CF\u4EFB\u52A1" }
+    ],
+    kimi: [
+      { value: "kimi-k3.1-pro", label: "Kimi K3.1 Pro", desc: "\u65D7\u8230\u591A\u6A21\u6001\u6A21\u578B\uFF0C\u652F\u6301\u89C6\u9891/\u56FE\u50CF\u7406\u89E3\uFF0C1M \u4E0A\u4E0B\u6587" },
+      { value: "kimi-k3", label: "Kimi K3", desc: "\u4E0A\u4E00\u4EE3\u65D7\u8230\uFF0C\u4FDD\u7559\u73B0\u6709\u9879\u76EE\u914D\u7F6E" },
+      { value: "kimi-k2.7-code", label: "Kimi K2.7", desc: "\u652F\u6301\u89C6\u9891/\u56FE\u50CF\u7406\u89E3\uFF0C\u63A8\u7406\u80FD\u529B\u5F3A" },
+      { value: "kimi-k2.7-code-highspeed", label: "Kimi K2.7 \u9AD8\u901F\u7248", desc: "\u540C K2.7\uFF0C\u51FA\u5B57\u66F4\u5FEB\u4F46\u66F4\u8D35" }
+    ],
+    minimax: [
+      { value: "MiniMax-M3", label: "MiniMax-M3", desc: "\u539F\u751F\u591A\u6A21\u6001\uFF0C\u652F\u6301\u89C6\u9891\u7406\u89E3\uFF0C1M \u4E0A\u4E0B\u6587" }
+    ],
+    openai: [
+      { value: "gpt-5.6", label: "GPT-5.6", desc: "\u63A8\u8350\uFF1A\u6700\u65B0\u65D7\u8230\u591A\u6A21\u6001\uFF0C\u5267\u672C\u8D70\u5173\u952E\u5E27\u591A\u56FE\u5206\u6790" },
+      { value: "gpt-5.5", label: "GPT-5.5", desc: "\u4E0A\u4E00\u4EE3\u4E3B\u529B\u591A\u6A21\u6001\uFF0C\u5267\u672C\u8D70\u5173\u952E\u5E27\u591A\u56FE\u5206\u6790" }
+    ],
+    anthropic: [
+      { value: "claude-fable-5", label: "Claude Fable 5", desc: "\u63A8\u7406\u4E0E\u89C6\u89C9\u7406\u89E3\uFF0C\u5267\u672C\u8D70\u5173\u952E\u5E27\u591A\u56FE\u5206\u6790" }
+    ]
+  },
+  providerTemplates: [
+    {
+      id: "deepseek",
+      name: "DeepSeek V4.1 Flash 1017",
+      base_url: "https://api.deepseek.com/v1",
+      model: "deepseek-flash",
+      script_input: "frames"
+    }
+  ],
+  openaiRequestRules: [
+    { modelPattern: "^gpt-5(?:\\.|$)", parameters: { reasoning_effort: "low" } },
+    { modelPattern: "^kimi-k3(?:\\.\\d+)?(?:-|$)", parameters: { reasoning_effort: "max" } }
+  ]
+};
+
+// packages/bcc-core/src/shared/model-presets.ts
+var BUILTIN_MODEL_PRESETS = model_catalog_default.presets;
+var DEFAULT_MODELS = model_catalog_default.defaults;
+var PROVIDER_TEMPLATES = model_catalog_default.providerTemplates;
+var requestRules = model_catalog_default.openaiRequestRules.map((rule) => ({
+  pattern: new RegExp(rule.modelPattern),
+  parameters: rule.parameters
+}));
+function getOpenAIRequestDefaults(model) {
+  const parameters = requestRules.find((rule) => rule.pattern.test(model.trim()))?.parameters;
+  return parameters ? { ...parameters } : {};
+}
+
 // packages/bcc-core/src/services/config.ts
 var import_promises = __toESM(require("node:fs/promises"), 1);
 var import_node_path = __toESM(require("node:path"), 1);
@@ -119427,28 +119487,28 @@ function isSandboxed() {
 var DEFAULT_CONFIG = {
   gemini: {
     api_key: "",
-    model: "gemini-3.5-flash",
+    model: DEFAULT_MODELS.gemini,
     video_resolution: "low",
     proxy: ""
   },
   kimi: {
     api_key: "",
-    model: "kimi-k3",
+    model: DEFAULT_MODELS.kimi,
     base_url: ""
   },
   minimax: {
     api_key: "",
-    model: "MiniMax-M3",
+    model: DEFAULT_MODELS.minimax,
     base_url: ""
   },
   openai: {
     api_key: "",
-    model: "gpt-5.6",
+    model: DEFAULT_MODELS.openai,
     base_url: ""
   },
   anthropic: {
     api_key: "",
-    model: "claude-fable-5",
+    model: DEFAULT_MODELS.anthropic,
     base_url: ""
   },
   custom_providers: [],
@@ -141933,7 +141993,7 @@ var KimiService = class {
     const { signal } = callbacks;
     this.log = createLogger("kimi", String(Date.now()));
     this.log.info(
-      `=== Kimi \u751F\u6210\u5267\u672C === model=${this.config.model || "kimi-k3"} baseUrl=${this.baseUrl} video=${import_node_path16.default.basename(videoPath)} size=${formatBytes(videoInfo.sizeBytes)} dur=${videoInfo.durationSec.toFixed(0)}s ${videoInfo.width}x${videoInfo.height}`
+      `=== Kimi \u751F\u6210\u5267\u672C === model=${this.config.model || DEFAULT_MODELS.kimi} baseUrl=${this.baseUrl} video=${import_node_path16.default.basename(videoPath)} size=${formatBytes(videoInfo.sizeBytes)} dur=${videoInfo.durationSec.toFixed(0)}s ${videoInfo.width}x${videoInfo.height}`
     );
     if (this.log.filePath) callbacks.onStatus?.("preparing", `\u8BCA\u65AD\u65E5\u5FD7: ${this.log.filePath}`);
     let file = null;
@@ -142068,7 +142128,7 @@ ${result}
   async streamChat(prompt, fileId, cb, systemPrompt) {
     const { signal } = cb;
     const url = `${this.baseUrl}/chat/completions`;
-    const model = this.config.model || "kimi-k3";
+    const model = this.config.model || DEFAULT_MODELS.kimi;
     const body = {
       model,
       messages: [
@@ -142085,7 +142145,7 @@ ${result}
       ],
       stream: true,
       stream_options: { include_usage: true },
-      ...model === "kimi-k3" ? { reasoning_effort: "max" } : {}
+      ...getOpenAIRequestDefaults(model)
     };
     this.log.info(
       `\u5BF9\u8BDD\u8BF7\u6C42: POST ${url} model=${body.model} video_url=ms://${fileId} prompt=${prompt.length}\u5B57 output_limit=provider-default`
@@ -142342,7 +142402,7 @@ var MinimaxService = class {
           Authorization: `Bearer ${this.config.api_key}`
         },
         body: JSON.stringify({
-          model: this.config.model || "MiniMax-M3",
+          model: this.config.model || DEFAULT_MODELS.minimax,
           messages: [{ role: "user", content: "ping" }],
           max_tokens: 1,
           stream: false
@@ -142360,7 +142420,7 @@ var MinimaxService = class {
         }
       } catch {
       }
-      return { ok: true, message: `\u8FDE\u63A5\u6210\u529F\uFF08${this.config.model || "MiniMax-M3"}\uFF09` };
+      return { ok: true, message: `\u8FDE\u63A5\u6210\u529F\uFF08${this.config.model || DEFAULT_MODELS.minimax}\uFF09` };
     } catch (err) {
       return { ok: false, message: explainError2(err) };
     }
@@ -142370,7 +142430,7 @@ var MinimaxService = class {
     const { signal } = callbacks;
     this.log = createLogger("minimax", String(Date.now()));
     this.log.info(
-      `=== MiniMax \u751F\u6210\u5267\u672C === model=${this.config.model || "MiniMax-M3"} baseUrl=${this.baseUrl} video=${import_node_path17.default.basename(videoPath)} size=${formatBytes(videoInfo.sizeBytes)} dur=${videoInfo.durationSec.toFixed(0)}s ${videoInfo.width}x${videoInfo.height}`
+      `=== MiniMax \u751F\u6210\u5267\u672C === model=${this.config.model || DEFAULT_MODELS.minimax} baseUrl=${this.baseUrl} video=${import_node_path17.default.basename(videoPath)} size=${formatBytes(videoInfo.sizeBytes)} dur=${videoInfo.durationSec.toFixed(0)}s ${videoInfo.width}x${videoInfo.height}`
     );
     if (this.log.filePath) callbacks.onStatus?.("preparing", `\u8BCA\u65AD\u65E5\u5FD7: ${this.log.filePath}`);
     let fileId = null;
@@ -142508,7 +142568,7 @@ ${script}
     const { signal } = cb;
     const url = `${this.baseUrl}/chat/completions`;
     const body = {
-      model: this.config.model || "MiniMax-M3",
+      model: this.config.model || DEFAULT_MODELS.minimax,
       messages: [
         { role: "system", content: systemPrompt || SCRIPT_SYSTEM_PROMPT },
         {
@@ -142822,7 +142882,7 @@ ${script}
           ]
         }
       ],
-      { log: this.log },
+      { log: this.log, extraBody: getOpenAIRequestDefaults(this.provider.model) },
       cb
     );
   }
@@ -143376,7 +143436,7 @@ var import_promises13 = __toESM(require("node:fs/promises"), 1);
 var import_node_os4 = __toESM(require("node:os"), 1);
 var import_node_path20 = __toESM(require("node:path"), 1);
 init_sdk();
-var ANTHROPIC_DEFAULT_MODEL = "claude-fable-5";
+var ANTHROPIC_DEFAULT_MODEL = DEFAULT_MODELS.anthropic;
 var REFUSAL_FALLBACK_MODEL = "claude-opus-4-8";
 var SERVER_SIDE_FALLBACK_BETA = "server-side-fallback-2026-06-01";
 var MAX_FRAMES = 24;
@@ -143670,8 +143730,6 @@ var OpenAICompatibleAnalyzer = class {
     const dataUrl = `data:image/jpeg;base64,${base64}`;
     const baseUrl = this.cfg.baseUrl.replace(/\/$/, "");
     const url = `${baseUrl}/chat/completions`;
-    const isKimiK3 = this.cfg.model === "kimi-k3";
-    const isOpenAIGpt5 = /^gpt-5(?:\.|$)/.test(this.cfg.model);
     const body = {
       model: this.cfg.model,
       messages: [
@@ -143683,8 +143741,7 @@ var OpenAICompatibleAnalyzer = class {
           ]
         }
       ],
-      ...isKimiK3 ? { reasoning_effort: "max" } : {},
-      ...isOpenAIGpt5 ? { reasoning_effort: "low" } : {}
+      ...getOpenAIRequestDefaults(this.cfg.model)
     };
     const resp = await fetch(url, {
       method: "POST",
@@ -143836,18 +143893,24 @@ function explainError3(err) {
 
 // packages/bcc-core/src/services/chatgpt.ts
 var OPENAI_DEFAULT_BASE_URL = "https://api.openai.com/v1";
-var OPENAI_DEFAULT_MODEL = "gpt-5.6";
+var OPENAI_DEFAULT_MODEL = DEFAULT_MODELS.openai;
 var MAX_FRAMES2 = 24;
 var MIN_INTERVAL_SEC2 = 2;
 var ChatGPTService = class {
-  constructor(cfg) {
+  constructor(cfg, providerName = "OpenAI") {
     this.cfg = cfg;
+    this.providerName = providerName;
     if (!cfg.api_key) {
-      throw new Error("OpenAI API Key \u672A\u914D\u7F6E\uFF0C\u8BF7\u5230\u8BBE\u7F6E\u9875\u586B\u5199");
+      throw new Error(`${providerName} API Key \u672A\u914D\u7F6E\uFF0C\u8BF7\u5230\u8BBE\u7F6E\u9875\u586B\u5199`);
+    }
+    if ("id" in cfg) {
+      if (!cfg.base_url?.trim()) throw new Error(`${providerName} Base URL \u672A\u914D\u7F6E`);
+      if (!cfg.model?.trim()) throw new Error(`${providerName} \u6A21\u578B\u540D\u672A\u914D\u7F6E`);
     }
     this.baseUrl = (cfg.base_url?.trim() || OPENAI_DEFAULT_BASE_URL).replace(/\/$/, "");
   }
   cfg;
+  providerName;
   baseUrl;
   log = NOOP_LOGGER;
   /** 生成剧本：均匀抽帧 → 多图+时间戳流式生成 → 去围栏 + 等比缩放时间戳 */
@@ -143856,7 +143919,7 @@ var ChatGPTService = class {
     const model = this.cfg.model?.trim() || OPENAI_DEFAULT_MODEL;
     this.log = createLogger("chatgpt-script", String(Date.now()));
     this.log.info(
-      `=== OpenAI \u751F\u6210\u5267\u672C === model=${model} baseUrl=${this.baseUrl} video=${import_node_path21.default.basename(videoPath)} dur=${videoInfo.durationSec.toFixed(0)}s`
+      `=== ${this.providerName} \u751F\u6210\u5267\u672C === model=${model} baseUrl=${this.baseUrl} video=${import_node_path21.default.basename(videoPath)} dur=${videoInfo.durationSec.toFixed(0)}s`
     );
     if (this.log.filePath) callbacks.onStatus?.("preparing", `\u8BCA\u65AD\u65E5\u5FD7: ${this.log.filePath}`);
     const duration = Math.max(1, videoInfo.durationSec);
@@ -143876,7 +143939,7 @@ var ChatGPTService = class {
           type: "text",
           text: `${userPrompt}
 
-\u3010\u8F93\u5165\u8BF4\u660E\u3011\u4EE5\u4E0B\u662F\u4ECE\u89C6\u9891\u6309\u65F6\u95F4\u987A\u5E8F\u5747\u5300\u62BD\u53D6\u7684 ${times.length} \u5F20\u5173\u952E\u5E27\uFF0C\u6BCF\u5F20\u56FE\u7247\u524D\u6807\u6CE8\u4E86\u5B83\u5728\u89C6\u9891\u4E2D\u7684\u65F6\u95F4\u6233\u3002\u8BF7\u7ED3\u5408\u76F8\u90BB\u5E27\u7684\u5DEE\u5F02\u63A8\u65AD\u573A\u666F\u5207\u6362\u4E0E\u53D9\u4E8B\u8282\u594F\uFF1B\u5267\u672C\u4E2D\u7684\u65F6\u95F4\u6233\u5FC5\u987B\u843D\u5728 00:00:00 ~ ${formatHMS2(videoInfo.durationSec)} \u8303\u56F4\u5185\u3002\u753B\u9762\u4E2D\u51FA\u73B0\u7684\u5B57\u5E55\u6587\u5B57\u662F\u53F0\u8BCD\u7684\u76F4\u63A5\u4F9D\u636E\u3002`
+\u3010\u8F93\u5165\u8BF4\u660E\u3011\u4EE5\u4E0B\u662F\u4ECE\u89C6\u9891\u6309\u65F6\u95F4\u987A\u5E8F\u5747\u5300\u62BD\u53D6\u7684 ${times.length} \u5F20\u5173\u952E\u5E27\uFF0C\u6BCF\u5F20\u56FE\u7247\u524D\u6807\u6CE8\u4E86\u5B83\u5728\u89C6\u9891\u4E2D\u7684\u65F6\u95F4\u6233\u3002\u8BF7\u7ED3\u5408\u76F8\u90BB\u5E27\u7684\u5DEE\u5F02\u63A8\u65AD\u573A\u666F\u5207\u6362\u4E0E\u53D9\u4E8B\u8282\u594F\uFF1B\u5267\u672C\u4E2D\u7684\u65F6\u95F4\u6233\u5FC5\u987B\u843D\u5728 00:00:00 ~ ${formatHMS2(videoInfo.durationSec)} \u8303\u56F4\u5185\u3002\u672C\u6B21\u8F93\u5165\u53EA\u6709\u9759\u6001\u56FE\u7247\uFF0C\u6CA1\u6709\u97F3\u9891\u3002\u53F0\u8BCD\u53EA\u4F9D\u636E\u53EF\u89C1\u5B57\u5E55\u6216\u7528\u6237\u63D0\u4F9B\u7684\u6587\u672C\uFF0C\u4E0D\u80FD\u6839\u636E\u53E3\u578B\u3001\u52A8\u4F5C\u6216\u5E38\u8BC6\u7F16\u9020\u5BF9\u767D\u3001\u65C1\u767D\u3001\u753B\u5916\u97F3\uFF1B\u6CA1\u6709\u4F9D\u636E\u65F6\u5199\u3010\u753B\u9762\u672A\u89C1\u5BF9\u767D\u3011\u3002`
         }
       ];
       callbacks.onStatus?.("uploading", `\u62BD\u53D6\u5E76\u7F16\u7801 ${times.length} \u5E27...`);
@@ -143895,14 +143958,14 @@ var ChatGPTService = class {
       this.log.info(`\u5E27\u7F16\u7801\u5B8C\u6210: ${times.length} \u5E27`);
       callbacks.onStatus?.("generating", "\u5F00\u59CB\u751F\u6210\u5267\u672C...");
       const raw = await streamOpenAIChatCompletion(
-        { name: "OpenAI", apiKey: this.cfg.api_key, baseUrl: this.baseUrl, model },
+        { name: this.providerName, apiKey: this.cfg.api_key, baseUrl: this.baseUrl, model },
         [
           { role: "system", content: systemPrompt || SCRIPT_SYSTEM_PROMPT },
           { role: "user", content: parts }
         ],
         {
-          // 剧本提取是明确的结构化任务，low 足够并能把更多输出空间留给正文。
-          extraBody: /^gpt-5(?:\.|$)/.test(model) ? { reasoning_effort: "low" } : void 0,
+          // 与分镜、风格合成共用目录中的供应商参数。
+          extraBody: getOpenAIRequestDefaults(model),
           log: this.log
         },
         callbacks
@@ -144213,7 +144276,7 @@ async function runScript(opts) {
     }, systemPrompt);
   } else if (cfg.custom_providers?.some((p2) => p2.id === cfg.script_provider)) {
     const custom = cfg.custom_providers.find((p2) => p2.id === cfg.script_provider);
-    const svc = new OpenAIScriptService(custom);
+    const svc = custom.script_input === "frames" ? new ChatGPTService(custom, custom.name) : new OpenAIScriptService(custom);
     script = await svc.generateScript(videoPath, videoInfo, {
       signal,
       onStatus: (status, message) => {
@@ -146558,11 +146621,11 @@ async function applyStoryboardBoundaryOverrides(projectId, videoPath, framesDir,
 }
 function providerLabelFor(cfg) {
   const provider = cfg.storyboard_provider ?? "gemini";
-  if (provider === "gemini") return `Gemini \xB7 ${cfg.gemini.model?.trim() || "gemini-3.5-flash"}`;
-  if (provider === "kimi") return `Kimi \xB7 ${cfg.kimi.model?.trim() || "kimi-k3"}`;
-  if (provider === "minimax") return `MiniMax \xB7 ${cfg.minimax.model?.trim() || "MiniMax-M3"}`;
-  if (provider === "openai") return `OpenAI \xB7 ${cfg.openai?.model?.trim() || "gpt-5.6"}`;
-  if (provider === "anthropic") return `Claude \xB7 ${cfg.anthropic?.model?.trim() || "claude-fable-5"}`;
+  if (provider === "gemini") return `Gemini \xB7 ${cfg.gemini.model?.trim() || DEFAULT_MODELS.gemini}`;
+  if (provider === "kimi") return `Kimi \xB7 ${cfg.kimi.model?.trim() || DEFAULT_MODELS.kimi}`;
+  if (provider === "minimax") return `MiniMax \xB7 ${cfg.minimax.model?.trim() || DEFAULT_MODELS.minimax}`;
+  if (provider === "openai") return `OpenAI \xB7 ${cfg.openai?.model?.trim() || DEFAULT_MODELS.openai}`;
+  if (provider === "anthropic") return `Claude \xB7 ${cfg.anthropic?.model?.trim() || DEFAULT_MODELS.anthropic}`;
   const custom = cfg.custom_providers?.find((p2) => p2.id === provider);
   return custom ? `${custom.name} \xB7 ${custom.model}` : provider;
 }
@@ -146574,7 +146637,7 @@ function resolveAnalyzerConfig(cfg) {
       provider: "gemini",
       apiKey: cfg.gemini.api_key,
       baseUrl: "",
-      model: cfg.gemini.model?.trim() || "gemini-3.5-flash"
+      model: cfg.gemini.model?.trim() || DEFAULT_MODELS.gemini
     };
   }
   if (provider === "kimi") {
@@ -146583,7 +146646,7 @@ function resolveAnalyzerConfig(cfg) {
       provider: "openai",
       apiKey: cfg.kimi.api_key,
       baseUrl: cfg.kimi.base_url || "https://api.moonshot.cn/v1",
-      model: cfg.kimi.model || "kimi-k3"
+      model: cfg.kimi.model || DEFAULT_MODELS.kimi
     };
   }
   if (provider === "minimax") {
@@ -146592,7 +146655,7 @@ function resolveAnalyzerConfig(cfg) {
       provider: "openai",
       apiKey: cfg.minimax.api_key,
       baseUrl: cfg.minimax.base_url || "https://api.minimaxi.com/v1",
-      model: cfg.minimax.model || "MiniMax-M3"
+      model: cfg.minimax.model || DEFAULT_MODELS.minimax
     };
   }
   if (provider === "openai") {
@@ -146601,7 +146664,7 @@ function resolveAnalyzerConfig(cfg) {
       provider: "openai",
       apiKey: cfg.openai.api_key,
       baseUrl: cfg.openai.base_url?.trim() || "https://api.openai.com/v1",
-      model: cfg.openai.model?.trim() || "gpt-5.6"
+      model: cfg.openai.model?.trim() || DEFAULT_MODELS.openai
     };
   }
   if (provider === "anthropic") {
@@ -146610,7 +146673,7 @@ function resolveAnalyzerConfig(cfg) {
       provider: "anthropic",
       apiKey: cfg.anthropic.api_key,
       baseUrl: cfg.anthropic.base_url?.trim() || "",
-      model: cfg.anthropic.model?.trim() || "claude-fable-5"
+      model: cfg.anthropic.model?.trim() || DEFAULT_MODELS.anthropic
     };
   }
   const custom = cfg.custom_providers?.find((p2) => p2.id === provider);
@@ -147053,8 +147116,6 @@ var OpenAISynthesizer = class {
       })
     );
     const baseUrl = this.cfg.baseUrl.replace(/\/$/, "");
-    const isKimiK3 = this.cfg.model === "kimi-k3";
-    const isOpenAIGpt5 = /^gpt-5(?:\.|$)/.test(this.cfg.model);
     const requestBody = {
       model: this.cfg.model,
       stream: true,
@@ -147066,8 +147127,7 @@ var OpenAISynthesizer = class {
           content: [{ type: "text", text: userText }, ...imageContent]
         }
       ],
-      ...isKimiK3 ? { reasoning_effort: "max" } : {},
-      ...isOpenAIGpt5 ? { reasoning_effort: "low" } : {}
+      ...getOpenAIRequestDefaults(this.cfg.model)
     };
     const resp = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
@@ -147682,23 +147742,23 @@ function resolveSynthesizerConfig(cfg) {
   const p2 = cfg.research.synthesis_provider ?? cfg.storyboard_provider ?? "gemini";
   if (p2 === "gemini") {
     if (!cfg.gemini.api_key) throw new Error("Gemini API Key \u672A\u914D\u7F6E");
-    return { provider: "gemini", apiKey: cfg.gemini.api_key, baseUrl: "", model: cfg.gemini.model || "gemini-3.5-flash" };
+    return { provider: "gemini", apiKey: cfg.gemini.api_key, baseUrl: "", model: cfg.gemini.model || DEFAULT_MODELS.gemini };
   }
   if (p2 === "kimi") {
     if (!cfg.kimi.api_key) throw new Error("Kimi API Key \u672A\u914D\u7F6E");
-    return { provider: "openai", apiKey: cfg.kimi.api_key, baseUrl: cfg.kimi.base_url || "https://api.moonshot.cn/v1", model: cfg.kimi.model || "kimi-k3" };
+    return { provider: "openai", apiKey: cfg.kimi.api_key, baseUrl: cfg.kimi.base_url || "https://api.moonshot.cn/v1", model: cfg.kimi.model || DEFAULT_MODELS.kimi };
   }
   if (p2 === "minimax") {
     if (!cfg.minimax.api_key) throw new Error("MiniMax API Key \u672A\u914D\u7F6E");
-    return { provider: "openai", apiKey: cfg.minimax.api_key, baseUrl: cfg.minimax.base_url || "https://api.minimaxi.com/v1", model: cfg.minimax.model || "MiniMax-M3" };
+    return { provider: "openai", apiKey: cfg.minimax.api_key, baseUrl: cfg.minimax.base_url || "https://api.minimaxi.com/v1", model: cfg.minimax.model || DEFAULT_MODELS.minimax };
   }
   if (p2 === "openai") {
     if (!cfg.openai?.api_key) throw new Error("OpenAI API Key \u672A\u914D\u7F6E");
-    return { provider: "openai", apiKey: cfg.openai.api_key, baseUrl: cfg.openai.base_url?.trim() || "https://api.openai.com/v1", model: cfg.openai.model?.trim() || "gpt-5.6" };
+    return { provider: "openai", apiKey: cfg.openai.api_key, baseUrl: cfg.openai.base_url?.trim() || "https://api.openai.com/v1", model: cfg.openai.model?.trim() || DEFAULT_MODELS.openai };
   }
   if (p2 === "anthropic") {
     if (!cfg.anthropic?.api_key) throw new Error("Anthropic API Key \u672A\u914D\u7F6E");
-    return { provider: "anthropic", apiKey: cfg.anthropic.api_key, baseUrl: cfg.anthropic.base_url?.trim() || "", model: cfg.anthropic.model?.trim() || "claude-fable-5" };
+    return { provider: "anthropic", apiKey: cfg.anthropic.api_key, baseUrl: cfg.anthropic.base_url?.trim() || "", model: cfg.anthropic.model?.trim() || DEFAULT_MODELS.anthropic };
   }
   const custom = cfg.custom_providers?.find((x2) => x2.id === p2);
   if (!custom) throw new Error(`\u672A\u77E5\u4F9B\u5E94\u5546: ${p2}`);
@@ -168542,7 +168602,7 @@ async function exportStoryboard(argv) {
 // apps/bcc-cli/src/index.ts
 console.log = console.error;
 console.info = console.error;
-var VERSION3 = true ? "0.4.0" : "0.0.0-dev";
+var VERSION3 = true ? "0.4.1" : "0.0.0-dev";
 var HELP = `\u5305\u62C6\u62C6 CLI (bcc) v${VERSION3}
 
 \u7528\u6CD5:

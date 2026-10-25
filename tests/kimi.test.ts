@@ -26,6 +26,19 @@ function streamChatOf(instance: KimiService): StreamChat {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('Kimi K3 剧本流式响应', () => {
+  it.each(['kimi-k3.1-pro', 'kimi-k3.1-pro-highspeed'])('%s 沿用视频和 Partial Mode，并携带集中配置的推理参数', async (model) => {
+    const fetchMock = vi.fn().mockResolvedValue(sseResponse([
+      { choices: [{ delta: { content: '教室 日/内' }, finish_reason: 'stop' }] },
+    ]))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await streamChatOf(service(model))('生成剧本', 'file-1', {})).toContain('教室')
+    const body = JSON.parse(String((fetchMock.mock.calls[0][1] as RequestInit).body))
+    expect(body.model).toBe(model)
+    expect(body.reasoning_effort).toBe('max')
+    expect(body.messages[1].content[0].video_url.url).toBe('ms://file-1')
+    expect(body.messages.at(-1).partial).toBe(true)
+  })
+
   it('不设置应用级输出上限，并只把最终正文拼成带时间戳的剧本', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       sseResponse([

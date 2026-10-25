@@ -222,7 +222,9 @@ export async function runScript(opts: RunScriptOptions): Promise<ScriptRunResult
     }, systemPrompt)
   } else if (cfg.custom_providers?.some((p) => p.id === cfg.script_provider)) {
     const custom = cfg.custom_providers.find((p) => p.id === cfg.script_provider)!
-    const svc = new OpenAIScriptService(custom)
+    const svc = custom.script_input === 'frames'
+      ? new ChatGPTService(custom, custom.name)
+      : new OpenAIScriptService(custom)
     script = await svc.generateScript(videoPath, videoInfo, {
       signal,
       onStatus: (status, message) => {

@@ -10,6 +10,7 @@
  * 不推送 IPC、不认 jobId；进度走 onProgress，成功返回 { styleGuide, meta }，失败/取消抛错。
  */
 import path from 'node:path'
+import { DEFAULT_MODELS } from '@shared/model-presets'
 import fs from 'node:fs/promises'
 import type {
   AppConfig,
@@ -359,23 +360,23 @@ export function resolveSynthesizerConfig(cfg: AppConfig): AnalyzerConfig {
   const p = cfg.research.synthesis_provider ?? cfg.storyboard_provider ?? 'gemini'
   if (p === 'gemini') {
     if (!cfg.gemini.api_key) throw new Error('Gemini API Key 未配置')
-    return { provider: 'gemini', apiKey: cfg.gemini.api_key, baseUrl: '', model: cfg.gemini.model || 'gemini-3.5-flash' }
+    return { provider: 'gemini', apiKey: cfg.gemini.api_key, baseUrl: '', model: cfg.gemini.model || DEFAULT_MODELS.gemini }
   }
   if (p === 'kimi') {
     if (!cfg.kimi.api_key) throw new Error('Kimi API Key 未配置')
-    return { provider: 'openai', apiKey: cfg.kimi.api_key, baseUrl: cfg.kimi.base_url || 'https://api.moonshot.cn/v1', model: cfg.kimi.model || 'kimi-k3' }
+    return { provider: 'openai', apiKey: cfg.kimi.api_key, baseUrl: cfg.kimi.base_url || 'https://api.moonshot.cn/v1', model: cfg.kimi.model || DEFAULT_MODELS.kimi }
   }
   if (p === 'minimax') {
     if (!cfg.minimax.api_key) throw new Error('MiniMax API Key 未配置')
-    return { provider: 'openai', apiKey: cfg.minimax.api_key, baseUrl: cfg.minimax.base_url || 'https://api.minimaxi.com/v1', model: cfg.minimax.model || 'MiniMax-M3' }
+    return { provider: 'openai', apiKey: cfg.minimax.api_key, baseUrl: cfg.minimax.base_url || 'https://api.minimaxi.com/v1', model: cfg.minimax.model || DEFAULT_MODELS.minimax }
   }
   if (p === 'openai') {
     if (!cfg.openai?.api_key) throw new Error('OpenAI API Key 未配置')
-    return { provider: 'openai', apiKey: cfg.openai.api_key, baseUrl: cfg.openai.base_url?.trim() || 'https://api.openai.com/v1', model: cfg.openai.model?.trim() || 'gpt-5.6' }
+    return { provider: 'openai', apiKey: cfg.openai.api_key, baseUrl: cfg.openai.base_url?.trim() || 'https://api.openai.com/v1', model: cfg.openai.model?.trim() || DEFAULT_MODELS.openai }
   }
   if (p === 'anthropic') {
     if (!cfg.anthropic?.api_key) throw new Error('Anthropic API Key 未配置')
-    return { provider: 'anthropic', apiKey: cfg.anthropic.api_key, baseUrl: cfg.anthropic.base_url?.trim() || '', model: cfg.anthropic.model?.trim() || 'claude-fable-5' }
+    return { provider: 'anthropic', apiKey: cfg.anthropic.api_key, baseUrl: cfg.anthropic.base_url?.trim() || '', model: cfg.anthropic.model?.trim() || DEFAULT_MODELS.anthropic }
   }
   const custom = cfg.custom_providers?.find((x) => x.id === p)
   if (!custom) throw new Error(`未知供应商: ${p}`)

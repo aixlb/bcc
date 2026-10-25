@@ -7,6 +7,7 @@ import fs from 'node:fs/promises'
 import { FinishReason, GoogleGenAI, ThinkingLevel } from '@google/genai'
 import type Anthropic from '@anthropic-ai/sdk'
 import type { AnalyzerConfig } from './storyboard-analyzer.js'
+import { getOpenAIRequestDefaults } from '@shared/model-presets'
 import { createAnthropicClient, explainAnthropicError, getClaudeMaxOutputTokens } from './claude.js'
 
 export interface SynthesizeOptions {
@@ -162,8 +163,6 @@ class OpenAISynthesizer implements Synthesizer {
     )
 
     const baseUrl = this.cfg.baseUrl.replace(/\/$/, '')
-    const isKimiK3 = this.cfg.model === 'kimi-k3'
-    const isOpenAIGpt5 = /^gpt-5(?:\.|$)/.test(this.cfg.model)
     const requestBody: Record<string, unknown> = {
       model: this.cfg.model,
       stream: true,
@@ -175,8 +174,7 @@ class OpenAISynthesizer implements Synthesizer {
           content: [{ type: 'text', text: userText }, ...imageContent],
         },
       ],
-      ...(isKimiK3 ? { reasoning_effort: 'max' } : {}),
-      ...(isOpenAIGpt5 ? { reasoning_effort: 'low' } : {}),
+      ...getOpenAIRequestDefaults(this.cfg.model),
     }
     const resp = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',

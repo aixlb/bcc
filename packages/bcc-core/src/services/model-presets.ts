@@ -1,6 +1,6 @@
 /**
  * 模型预设的读盘 + 合并：内置默认（@shared/model-presets）+ 数据目录下的 models.json。
- * 与 config.yaml 同目录，用户可手动编辑，免升级即可增删 GUI 模型下拉项。
+ * 与 config.yaml 同目录，用户可手动编辑，免升级即可新增或覆盖 GUI 模型下拉项。
  */
 import fs from 'node:fs/promises'
 import path from 'node:path'

@@ -6,6 +6,7 @@
  */
 
 import path from 'node:path'
+import { DEFAULT_MODELS } from '@shared/model-presets'
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import type { ProgressTarget } from '../runtime.js'
@@ -1664,11 +1665,11 @@ export interface RunStoryboardResult {
 /** 由当前配置推导分镜分析使用的「供应商 · 模型」标签，给任务卡显示 */
 function providerLabelFor(cfg: ReturnType<typeof getConfig>): string {
   const provider = cfg.storyboard_provider ?? 'gemini'
-  if (provider === 'gemini') return `Gemini · ${cfg.gemini.model?.trim() || 'gemini-3.5-flash'}`
-  if (provider === 'kimi') return `Kimi · ${cfg.kimi.model?.trim() || 'kimi-k3'}`
-  if (provider === 'minimax') return `MiniMax · ${cfg.minimax.model?.trim() || 'MiniMax-M3'}`
-  if (provider === 'openai') return `OpenAI · ${cfg.openai?.model?.trim() || 'gpt-5.6'}`
-  if (provider === 'anthropic') return `Claude · ${cfg.anthropic?.model?.trim() || 'claude-fable-5'}`
+  if (provider === 'gemini') return `Gemini · ${cfg.gemini.model?.trim() || DEFAULT_MODELS.gemini}`
+  if (provider === 'kimi') return `Kimi · ${cfg.kimi.model?.trim() || DEFAULT_MODELS.kimi}`
+  if (provider === 'minimax') return `MiniMax · ${cfg.minimax.model?.trim() || DEFAULT_MODELS.minimax}`
+  if (provider === 'openai') return `OpenAI · ${cfg.openai?.model?.trim() || DEFAULT_MODELS.openai}`
+  if (provider === 'anthropic') return `Claude · ${cfg.anthropic?.model?.trim() || DEFAULT_MODELS.anthropic}`
   const custom = cfg.custom_providers?.find((p) => p.id === provider)
   return custom ? `${custom.name} · ${custom.model}` : provider
 }
@@ -1684,7 +1685,7 @@ export function resolveAnalyzerConfig(cfg: ReturnType<typeof getConfig>): Analyz
       provider: 'gemini',
       apiKey: cfg.gemini.api_key,
       baseUrl: '',
-      model: cfg.gemini.model?.trim() || 'gemini-3.5-flash',
+      model: cfg.gemini.model?.trim() || DEFAULT_MODELS.gemini,
     }
   }
   if (provider === 'kimi') {
@@ -1693,7 +1694,7 @@ export function resolveAnalyzerConfig(cfg: ReturnType<typeof getConfig>): Analyz
       provider: 'openai',
       apiKey: cfg.kimi.api_key,
       baseUrl: cfg.kimi.base_url || 'https://api.moonshot.cn/v1',
-      model: cfg.kimi.model || 'kimi-k3',
+      model: cfg.kimi.model || DEFAULT_MODELS.kimi,
     }
   }
   if (provider === 'minimax') {
@@ -1702,7 +1703,7 @@ export function resolveAnalyzerConfig(cfg: ReturnType<typeof getConfig>): Analyz
       provider: 'openai',
       apiKey: cfg.minimax.api_key,
       baseUrl: cfg.minimax.base_url || 'https://api.minimaxi.com/v1',
-      model: cfg.minimax.model || 'MiniMax-M3',
+      model: cfg.minimax.model || DEFAULT_MODELS.minimax,
     }
   }
   if (provider === 'openai') {
@@ -1711,7 +1712,7 @@ export function resolveAnalyzerConfig(cfg: ReturnType<typeof getConfig>): Analyz
       provider: 'openai',
       apiKey: cfg.openai.api_key,
       baseUrl: cfg.openai.base_url?.trim() || 'https://api.openai.com/v1',
-      model: cfg.openai.model?.trim() || 'gpt-5.6',
+      model: cfg.openai.model?.trim() || DEFAULT_MODELS.openai,
     }
   }
   if (provider === 'anthropic') {
@@ -1720,7 +1721,7 @@ export function resolveAnalyzerConfig(cfg: ReturnType<typeof getConfig>): Analyz
       provider: 'anthropic',
       apiKey: cfg.anthropic.api_key,
       baseUrl: cfg.anthropic.base_url?.trim() || '',
-      model: cfg.anthropic.model?.trim() || 'claude-fable-5',
+      model: cfg.anthropic.model?.trim() || DEFAULT_MODELS.anthropic,
     }
   }
   const custom = cfg.custom_providers?.find((p) => p.id === provider)

@@ -24,6 +24,7 @@
   "include": [
     "apps/bcc-desktop/src/renderer/src/**/*.ts",
     "apps/bcc-desktop/src/renderer/src/**/*.tsx",
-    "packages/bcc-core/src/shared/**/*.ts"
+    "packages/bcc-core/src/shared/**/*.ts",
+    "packages/bcc-core/src/shared/**/*.json"
   ]
 }

@@ -6,6 +6,7 @@
 import { randomUUID } from 'node:crypto'
 import type { WebContents } from 'electron'
 import type { AppConfig, JobStatus, ProgressEvent, ScriptResult } from '@shared/types'
+import { DEFAULT_MODELS } from '@shared/model-presets'
 import { IPC } from '@shared/ipc-channels'
 import { getConfig } from '@core/services/config.js'
 import { masterLabelSuffix } from '@core/services/masters.js'
@@ -15,11 +16,11 @@ import { runScript } from '@core/pipelines/script.js'
 /** 由当前配置推导剧本生成使用的「供应商 · 模型」标签（记进版本元数据） */
 function scriptProviderLabel(cfg: AppConfig): string {
   const provider = cfg.script_provider ?? 'gemini'
-  if (provider === 'gemini') return `Gemini · ${cfg.gemini.model?.trim() || 'gemini-3.5-flash'}`
-  if (provider === 'kimi') return `Kimi · ${cfg.kimi.model?.trim() || 'kimi'}`
-  if (provider === 'minimax') return `MiniMax · ${cfg.minimax.model?.trim() || 'MiniMax-M3'}`
-  if (provider === 'openai') return `OpenAI · ${cfg.openai?.model?.trim() || 'gpt-5.6'}`
-  if (provider === 'anthropic') return `Claude · ${cfg.anthropic?.model?.trim() || 'claude-fable-5'}`
+  if (provider === 'gemini') return `Gemini · ${cfg.gemini.model?.trim() || DEFAULT_MODELS.gemini}`
+  if (provider === 'kimi') return `Kimi · ${cfg.kimi.model?.trim() || DEFAULT_MODELS.kimi}`
+  if (provider === 'minimax') return `MiniMax · ${cfg.minimax.model?.trim() || DEFAULT_MODELS.minimax}`
+  if (provider === 'openai') return `OpenAI · ${cfg.openai?.model?.trim() || DEFAULT_MODELS.openai}`
+  if (provider === 'anthropic') return `Claude · ${cfg.anthropic?.model?.trim() || DEFAULT_MODELS.anthropic}`
   const custom = cfg.custom_providers?.find((p) => p.id === provider)
   return custom ? `${custom.name} · ${custom.model}` : provider
 }

@@ -5,6 +5,7 @@
 import fs from 'node:fs/promises'
 import { FinishReason, GoogleGenAI, ThinkingLevel } from '@google/genai'
 import type { StoryboardShot } from '@shared/types'
+import { getOpenAIRequestDefaults } from '@shared/model-presets'
 import {
   formatStoryboardDescription,
   normalizeStoryboardShotType,
@@ -145,8 +146,6 @@ class OpenAICompatibleAnalyzer implements ImageAnalyzer {
     const baseUrl = this.cfg.baseUrl.replace(/\/$/, '')
     const url = `${baseUrl}/chat/completions`
 
-    const isKimiK3 = this.cfg.model === 'kimi-k3'
-    const isOpenAIGpt5 = /^gpt-5(?:\.|$)/.test(this.cfg.model)
     const body: Record<string, unknown> = {
       model: this.cfg.model,
       messages: [
@@ -158,8 +157,7 @@ class OpenAICompatibleAnalyzer implements ImageAnalyzer {
           ],
         },
       ],
-      ...(isKimiK3 ? { reasoning_effort: 'max' } : {}),
-      ...(isOpenAIGpt5 ? { reasoning_effort: 'low' } : {}),
+      ...getOpenAIRequestDefaults(this.cfg.model),
     }
 
     // 把 signal 传给 fetch：取消时立刻中断在途请求（socket 关闭），不再干等大模型返回。

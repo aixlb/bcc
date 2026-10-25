@@ -1,3 +1,4 @@
+import { DEFAULT_MODELS } from '@shared/model-presets'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type { AppConfig } from '@shared/types'
@@ -40,11 +41,11 @@ export function resolveProviderLabel(
 ): ProviderLabel | null {
   if (!config) return null
   const p = provider ?? 'gemini'
-  if (p === 'gemini') return { name: 'Gemini', model: config.gemini.model?.trim() || 'gemini-3.5-flash' }
-  if (p === 'kimi') return { name: 'Kimi', model: config.kimi.model?.trim() || 'kimi-k3' }
-  if (p === 'minimax') return { name: 'MiniMax', model: config.minimax?.model?.trim() || 'MiniMax-M3' }
-  if (p === 'openai') return { name: 'OpenAI', model: config.openai?.model?.trim() || 'gpt-5.6' }
-  if (p === 'anthropic') return { name: 'Claude', model: config.anthropic?.model?.trim() || 'claude-fable-5' }
+  if (p === 'gemini') return { name: 'Gemini', model: config.gemini.model?.trim() || DEFAULT_MODELS.gemini }
+  if (p === 'kimi') return { name: 'Kimi', model: config.kimi.model?.trim() || DEFAULT_MODELS.kimi }
+  if (p === 'minimax') return { name: 'MiniMax', model: config.minimax?.model?.trim() || DEFAULT_MODELS.minimax }
+  if (p === 'openai') return { name: 'OpenAI', model: config.openai?.model?.trim() || DEFAULT_MODELS.openai }
+  if (p === 'anthropic') return { name: 'Claude', model: config.anthropic?.model?.trim() || DEFAULT_MODELS.anthropic }
   const custom = config.custom_providers?.find((c) => c.id === p)
   if (custom) return { name: custom.name?.trim() || '自定义供应商', model: custom.model?.trim() || '' }
   return null

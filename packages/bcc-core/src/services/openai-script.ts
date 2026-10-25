@@ -13,6 +13,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { CustomProvider } from '@shared/types'
+import { getOpenAIRequestDefaults } from '@shared/model-presets'
 import { buildScriptPrompt, SCRIPT_SYSTEM_PROMPT } from './prompt.js'
 import { compressIfNeeded, formatBytes, type VideoInfo } from './video.js'
 import { createLogger, NOOP_LOGGER, type DebugLogger } from './logger.js'
@@ -282,7 +283,7 @@ export class OpenAIScriptService {
           ],
         },
       ],
-      { log: this.log },
+      { log: this.log, extraBody: getOpenAIRequestDefaults(this.provider.model) },
       cb
     )
   }
